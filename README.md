@@ -65,7 +65,7 @@ pip install botometer
   4. **crontab**
      - The crontab runs the given tasks in the background at specific times. We can use the crontab to scrape the user profiles daily.
      - Follow the below commands to setup the crontab on your system:
-       - **open terminal**
+       - open terminal
        - Use command `crontab -e` to open or edit the crontab file.
        - If asked to select an editor choose according to your preference. **Nano** is the easiest.
        - Use arrow keys to reach to the bottom of the file.
