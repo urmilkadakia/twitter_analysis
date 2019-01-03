@@ -7,13 +7,13 @@
 - Fill the application form and click on **Create**.
 
 ### Fill up the api_keys.py file
--In the Dashboard of your **twitter developer account->App** menu select your app. Under the section **Keys and tokens** you will find your api keys and access tokens.
+- In the Dashboard of your **twitter developer account->App** menu select your app. Under the section **Keys and tokens** you will find your api keys and access tokens.
 - Copy and paste the keys and tokens to the respective variables and save the file.
 
 
 ### installing Tweepy
 - **Tweepy** is a wrapper around the Twitter Rest API.
--install using pip `pip install tweepy`.
+-i nstall using pip `pip install tweepy`.
 
 
 command to run the scraper.py
