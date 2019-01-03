@@ -19,9 +19,10 @@
 
 
 ### Command to run the code
-Use the following command to run the code on terminal:
+- Use the following command to run the code on terminal:
+
 `python scraper.py -i <input file> -o <output file folder path> -f <json|csv> -u <1|0>`
-Pass `-h` as argument for help menu.
+- Pass `-h` as argument for help menu.
 
 botometer....
 mashable api key
