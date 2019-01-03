@@ -25,10 +25,10 @@ python scraper.py -i <input file> -o <output file folder path> -f <json|csv> -u 
 ```
 Pass `-h` as argument for help menu.
 
-botometer....
-mashable api key
+### botometer....
+### mashable api key
 
-how to run botometer
+### how to run botometer
 
 
 ### License
