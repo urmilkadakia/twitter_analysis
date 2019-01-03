@@ -30,3 +30,7 @@ mashable api key
 
 how to run botometer
 
+
+### License
+GNU
+
