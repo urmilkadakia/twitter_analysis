@@ -1,5 +1,7 @@
 # twitter_analysis
 
+What is this tool???
+
 ## Install instructions
 
 ### Creating twitter developer account
@@ -59,8 +61,13 @@ pip install botometer
     ```
     - Here n refers to the type of ngram, 1 for unigram, 2 for bigram, 3 for trigram etc.
     - Pass `-h` as argument for the help menu.
-
-### setup crontab
+  
+  4. **setup crontab**
+     - The crontab runs the given tasks in the background at specific times. We can use the crontab to scrape the user profiles daily.
+     - Follow the below commands to setup the crontab on your system:
+       - **open terminal**
+       - Use command `crontab -e` to open or edit the crontab file.
+       - If asked to select an editor choose according to your preference. **Nano** is the easiest.
 
 ### License
 GNU
