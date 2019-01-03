@@ -50,14 +50,14 @@ pip install botometer
     - This code returns a file which contains the botometer score for each user.
     - Use the following command to run botornot.py on terminal:
     ```
-    python botornot.py -i <input_file> -o <outputfile>
+    python botornot.py -i <input file> -o <output file>
     ```
     - Pass `-h` as argument for the help menu.
     
  3. **ngram frequencies and summary stastistics**
     - This code returns a file that contains the frequency of specified ngram along with the user description length histogram.
     ```
-    python ngram_frequency.py -i <input_file> -o <output_file> -n <1|2|3|...>
+    python ngram_frequency.py -i <input file> -o <output file> -n <1|2|3|...>
     ```
     - Here n refers to the type of ngram, 1 for unigram, 2 for bigram, 3 for trigram etc.
     - Pass `-h` as argument for the help menu.
@@ -76,7 +76,7 @@ pip install botometer
        - Use * to match any value.
        -   Write the follwoing command in the file to run the profile collector daily:
        ```
-       59 9 * * * cd <path where all the files are stored> && /usr/bin/python <path to profile_collector.py> -i -i <input file> -o <output file folder path> -f <json|csv> -u <1|0>
+       59 9 * * * cd <path where all the files are stored> && /usr/bin/python <path to profile_collector.py> -i <input file> -o <output file folder path> -f <json|csv> -u <1|0>
        ```
        - The location or the name of the python interpreter may vary.
 
