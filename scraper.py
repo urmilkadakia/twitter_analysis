@@ -15,7 +15,7 @@ def main():
         outputfile = open(args.outputfile + 'output_' + timestr + '.txt', "w+")
     clean_userid_file = ''
     if args.clean_userid:
-        clean_userid_file = csv.writer(open(args.outputfile + 'new_userid_list_' + timestr + '.txt', "w+"))
+        clean_userid_file = csv.writer(open(args.outputfile + 'new_userid_list_' + timestr + '.csv', "w+"))
     twitter_scraper.genFile(inputfile, outputfile, args.format, args.clean_userid, clean_userid_file)
 
 
