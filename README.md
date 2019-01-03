@@ -15,7 +15,7 @@
 - **Tweepy** is a wrapper around the Twitter Rest API.
 - Install using pip run: `pip install tweepy`
 - Install using anaconda Cloud run: ` conda install -c conda-forge tweepy`
-- For more information on tweepy visit: [Tweepy Documentation](https://tweepy.readthedocs.io/en/3.7.0/index.html#)
+- For more information on tweepy visit: [Tweepy Documentation](https://tweepy.readthedocs.io/en/3.7.0/index.html#).
 
 
 command to run the scraper.py
