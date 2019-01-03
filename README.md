@@ -54,7 +54,7 @@ pip install botometer
     ```
     - Pass `-h` as argument for the help menu.
     
- 3. **ngram frequencies and summary stastistics**
+ 3. **Ngram frequencies and summary stastistics**
     - This code returns a file that contains the frequency of specified ngram along with the user description length histogram.
     ```
     python ngram_frequency.py -i <input file> -o <output file> -n <1|2|3|...>
@@ -62,7 +62,7 @@ pip install botometer
     - Here n refers to the type of ngram, 1 for unigram, 2 for bigram, 3 for trigram etc.
     - Pass `-h` as argument for the help menu.
   
-  4. **crontab**
+  4. **Crontab**
      - The crontab runs the given tasks in the background at specific times. We can use the crontab to scrape the user profiles daily.
      - Follow the below commands to setup the crontab on your system:
        - open terminal
