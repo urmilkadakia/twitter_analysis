@@ -6,7 +6,7 @@
 - From the dashboard click on **your username -> Apps**. If you want to use an **existing app** select one or click on **Create an app**.
 - Fill the application form and click on **Create**.
 
-### Fill up the api_keys.py file
+### Updating the api_keys.py file
 - In the Dashboard of your **twitter developer account->App** menu select your app. Under the section **Keys and tokens** you will find your api keys and access tokens.
 - Copy and paste the keys and tokens to the respective variables and save the file.
 
@@ -18,7 +18,8 @@
 - For more information on tweepy visit: [Tweepy Documentation](https://tweepy.readthedocs.io/en/3.7.0/index.html#).
 
 
-command to run the scraper.py
+### Command to run the code
+`python scraper.py -i <input file> -o <output file folder path> -f <json|csv> -u <1|0>`
 
 botometer....
 mashable api key
