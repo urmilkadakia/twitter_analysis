@@ -3,6 +3,7 @@ import csv
 import twitter_scraper
 import time
 
+
 def main():
 
     timestr = time.strftime("%m_%d_%Y")

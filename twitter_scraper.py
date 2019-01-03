@@ -48,13 +48,14 @@ def genFile(inputfile, outputfile, format, clean_userid, clean_userid_file):
     user_id_failed = []
     # user_if_success contains a list of user IDs that api extracted
     user_id_success = []
+    json_list = []
     header_flag = 0
 
     for line in inputfile:
         user_id_all.append(int(line.strip()))
 
         # Call the lookup function for a list 100 user IDs
-        if count % 2 == 0:
+        if count % 100 == 0:
             try:
                 status_object_list = api.lookup_users(user_ids=user_id_all)
             except:
@@ -69,10 +70,11 @@ def genFile(inputfile, outputfile, format, clean_userid, clean_userid_file):
 
             # Store the converted user status data in the output file
             if format == "json":
-                for status in statuses:
-                    json_status = json.dumps(status)
-                    outputfile.write(json_status)
-                    outputfile.write("\n")
+                json_list.extend(statuses)
+                # for status in statuses:
+                #     json_status = json.dumps(status)
+                #     outputfile.write(json_status)
+                #     outputfile.write("\n")
             # If defined format is csv then the following code snippet will store the user status
             # data into csv format in the output file
             else:
@@ -97,5 +99,9 @@ def genFile(inputfile, outputfile, format, clean_userid, clean_userid_file):
             user_id_success.clear()
         count += 1
 
-    # print("failed_IDs:", user_id_failed)
-    # print("Number of failed ID:", len(user_id_failed))
+    if format == 'json':
+        json_status = json.dumps(json_list)
+        outputfile.write(json_status)
+
+    print("failed_IDs:", user_id_failed)
+    print("Number of failed ID:", len(user_id_failed))
