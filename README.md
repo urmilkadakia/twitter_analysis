@@ -74,7 +74,7 @@ pip install botometer
        minute(0-59) hour(0-23) day(1-31) month(1-12) weekday(0-6) command
        ```
        - Use * to match any value.
-       -   Write the follwoing command in the file to run the profile collector daily:
+       -   Write the follwoing command in the file to run the profile collector daily at 9:59 am:
        ```
        59 9 * * * cd <path where all the files are stored> && /usr/bin/python <path to profile_collector.py> -i <input file> -o <output file folder path> -f <json|csv> -u <1|0>
        ```
