@@ -17,7 +17,16 @@
 - Install using anaconda Cloud run: ` conda install -c conda-forge tweepy`
 - For more information on tweepy visit: [Tweepy Documentation](https://tweepy.readthedocs.io/en/3.7.0/index.html#).
 
-### botometer
+### Botometer
+- Botometer checks the activity of a Twitter account and gives it a score based on how likely the account is to be a bot. Higher scores are more bot-like. 
+- For more information regarding the botometer score please visit: [botometer](https://botometer.iuni.iu.edu/#!/)
+- **Instaling Botometer**
+```
+pip install botometer
+```
+- **Python dependencies:
+  - **tweepy** install as mentioned above.
+  - **requests** install using following command: `pip install requests`.
 
 ### mashable api keys
 
@@ -38,7 +47,6 @@
     python botornot.py -i <input_file> -o <outputfile>
     ```
     - Pass `-h` as argument for the help menu.
-    - For more information regarding the botometer score please visit: [botometer](https://botometer.iuni.iu.edu/#!/)
     
  3. **ngram frequencies and summary stastistics**
     - This code returns a file that contains the frequency of specified ngram along with the user description length histogram.
