@@ -18,12 +18,15 @@
 - For more information on tweepy visit: [Tweepy Documentation](https://tweepy.readthedocs.io/en/3.7.0/index.html#).
 
 
-### Command to run the code
-Use the following command to run the code on terminal:
+### Command to run the codes
+1. scraper.py
+- Use the following command to run scraper.py on terminal:
 ```
 python scraper.py -i <input file> -o <output file folder path> -f <json|csv> -u <1|0>
 ```
-Pass `-h` as argument for help menu.
+- Pass `-h` as argument for help menu.
+
+### setup crontab
 
 ### botometer....
 ### mashable api key
