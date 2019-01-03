@@ -28,7 +28,7 @@ A python project to study patterns in identity change as revealed by the edits u
 ```
 pip install botometer
 ```
-- **Python dependencies:
+- **Python dependencies**:
   - **tweepy** install as mentioned above.
   - **requests** install using following command: `pip install requests`.
 
