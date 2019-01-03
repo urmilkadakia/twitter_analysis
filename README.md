@@ -38,11 +38,11 @@ pip install botometer
 
 
 ## Usage
-1. **scraper.py**
+1. **profile_collector.py**
    - This code takes the list the userids as input and return 2 files. The first file contains the user lookups and second file contains the a list of userids that are are not unknown, suspended or deleted.
    - Use the following command to run scraper.py on terminal:
    ```
-   python scraper.py -i <input file> -o <output file folder path> -f <json|csv> -u <1|0>
+   python profile_collector.py -i <input file> -o <output file folder path> -f <json|csv> -u <1|0>
    ```
    - Pass `-h` as argument for help menu.
    
@@ -62,12 +62,23 @@ pip install botometer
     - Here n refers to the type of ngram, 1 for unigram, 2 for bigram, 3 for trigram etc.
     - Pass `-h` as argument for the help menu.
   
-  4. **setup crontab**
+  4. **crontab**
      - The crontab runs the given tasks in the background at specific times. We can use the crontab to scrape the user profiles daily.
      - Follow the below commands to setup the crontab on your system:
        - **open terminal**
        - Use command `crontab -e` to open or edit the crontab file.
        - If asked to select an editor choose according to your preference. **Nano** is the easiest.
+       - Use arrow keys to reach to the bottom of the file.
+       - Lines in the crontab has the following format:
+       ```
+       minute(0-59) hour(0-23) day(1-31) month(1-12) weekday(0-6) command
+       ```
+       - Use * to match any value.
+       -   Write the follwoing command in the file to run the profile collector daily:
+       ```
+       59 9 * * * cd <path where all the files are stored> && /usr/bin/python <path to profile_collector.py> -i -i <input file> -o <output file folder path> -f <json|csv> -u <1|0>
+       ```
+       - The location or the name of the python interpreter may vary.
 
 ### License
 GNU
