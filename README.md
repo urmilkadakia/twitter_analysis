@@ -1,5 +1,7 @@
 # twitter_analysis
 
+## Install instructions
+
 ### Creating twitter developer account
 - You need to have a twitter account. If you don't have create one.
 - Follow the instruction on the page [developer portal](https://developer.twitter.com/en/docs/basics/developer-portal/overview) and click on **Apply for devepoler account**.
@@ -28,10 +30,12 @@ pip install botometer
   - **tweepy** install as mentioned above.
   - **requests** install using following command: `pip install requests`.
 
-### mashable api keys
+### Mashape Market API key
+- Botometer runs on the Mashape server, so to use botomerter you must signup for a free account to get the Mashape secret key.
+- Visit [API endpoint page](https://market.mashape.com/OSoMe/botometer) and look in the **Request Example -> X-Mashape-Key** to get the secret key.
 
 
-### Command to run the codes
+## Usage
 1. **scraper.py**
    - This code takes the list the userids as input and return 2 files. The first file contains the user lookups and second file contains the a list of userids that are are not unknown, suspended or deleted.
    - Use the following command to run scraper.py on terminal:
