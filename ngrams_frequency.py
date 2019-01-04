@@ -2,6 +2,7 @@ import json
 import nltk
 # from nltk.collocations import *
 from nltk.util import ngrams
+from nltk.tokenize import TweetTokenizer
 import collections
 import re
 import string
@@ -26,7 +27,9 @@ def ngram_frequency_dist(inputfile, outputfilepath, n=1):
     text = re.sub(punctuation_no_period, "", text)
 
     # Splits the sentences into words
-    tokens = nltk.word_tokenize(text)
+    tknzr = TweetTokenizer(strip_handles=True, reduce_len=True)
+    tokens = tknzr.tokenize(text)
+    # tokens = nltk.word_tokenize(text)
 
     ngrams_list = ngrams(tokens, n)
     # get the frequency of each bigram in our corpus
@@ -72,6 +75,7 @@ def main():
     ngram_frequency_dist(args.inputfile, args.outputfile, args.n)
 
     gen_histogram(args.inputfile, args.outputfile)
+
 
 if __name__ == "__main__":
     main()
