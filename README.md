@@ -40,7 +40,7 @@ pip install botometer
 ## Usage
 1. **profile_collector.py**
    - This code takes the list the userids as input and return 2 files. The first file contains the user lookups and second file contains the a list of userids that are are not unknown, suspended or deleted.
-   - Use the following command to run scraper.py on terminal:
+   - Use the following command to run profile_collector.py on terminal:
    ```
    python profile_collector.py -i <input file> -o <output file folder path> -f <json|csv> -u <1|0>
    ```
