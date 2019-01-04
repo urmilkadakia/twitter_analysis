@@ -49,6 +49,7 @@ def main():
 
     bot_or_not(inputfile, outputfile)
 
+
 if __name__ == "__main__":
     main()
 
