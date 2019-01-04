@@ -4,14 +4,14 @@ A python project to study patterns in identity change as revealed by the edits u
 
 ## Install instructions
 
-### Creating twitter developer account
-- You need to have a twitter account. If you don't have create one.
-- Follow the instruction on the page [developer portal](https://developer.twitter.com/en/docs/basics/developer-portal/overview) and click on **Apply for devepoler account**.
+### Creating a Twitter developer account
+- You need to have a twitter account. If you don't have to create one.
+- Follow the instruction on the page [developer portal](https://developer.twitter.com/en/docs/basics/developer-portal/overview) and click on **Apply for developer account**.
 - From the dashboard click on **your username -> Apps**. If you want to use an **existing app** select one or click on **Create an app**.
 - Fill the application form and click on **Create**.
 
 ### Updating the api_keys.py file
-- In the Dashboard of your **twitter developer account->App** menu select your app. Under the section **Keys and tokens** you will find your api keys and access tokens.
+- In the Dashboard of your **twitter developer account -> App** menu select your app. Under the section **Keys and tokens** you will find your API keys and access tokens.
 - Copy and paste the keys and tokens to the respective variables and save the file.
 
 
@@ -30,7 +30,7 @@ pip install botometer
 ```
 - **Python dependencies**:
   - **tweepy** install as mentioned above.
-  - **requests** install using following command: `pip install requests`.
+  - **requests** install using the following command: `pip install requests`.
 
 ### Mashape Market API key
 - Botometer runs on the Mashape server, so to use botomerter you must signup for a free account to get the Mashape secret key.
@@ -54,7 +54,7 @@ pip install botometer
     ```
     - Pass `-h` as argument for the help menu.
     
- 3. **Ngram frequencies and summary stastistics**
+ 3. **Ngram frequencies and summary statistics**
     - This code returns a file that contains the frequency of specified ngram along with the user description length histogram.
     ```
     python ngram_frequency.py -i <input file> -o <output file> -n <1|2|3|...>
