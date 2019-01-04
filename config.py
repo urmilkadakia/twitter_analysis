@@ -31,7 +31,7 @@ def parse_args2():
                         help="Input file path", type=lambda x: is_valid_file(parser, x))
     parser.add_argument("-o", dest="outputfile", required=True,
                         help="Output file path")
-    parser.add_argument("-ngram", dest="n", required=False,
+    parser.add_argument("-n", dest="n", required=False,
                         help="Specify the ngram", default=1, type=int)
     args = parser.parse_args()
 

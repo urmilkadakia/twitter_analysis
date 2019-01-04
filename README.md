@@ -10,11 +10,6 @@ A python project to study patterns in identity change as revealed by the edits u
 - From the dashboard click on **your username -> Apps**. If you want to use an **existing app** select one or click on **Create an app**.
 - Fill the application form and click on **Create**.
 
-### Updating the api_keys.py file
-- In the Dashboard of your **twitter developer account -> App** menu select your app. Under the section **Keys and tokens** you will find your API keys and access tokens.
-- Copy and paste the keys and tokens to the respective variables and save the file.
-
-
 ### installing Tweepy
 - **Tweepy** is a wrapper around the Twitter Rest API.
 - Install using pip run: `pip install tweepy`
@@ -35,6 +30,11 @@ pip install botometer
 ### Mashape Market API key
 - Botometer runs on the Mashape server, so to use botomerter you must signup for a free account to get the Mashape secret key.
 - Visit [API endpoint page](https://market.mashape.com/OSoMe/botometer) and look in the **Request Example -> X-Mashape-Key** to get the secret key.
+
+### Updating the api_keys.py file
+- In the Dashboard of your **twitter developer account -> App** menu select your app. Under the section **Keys and tokens** you will find your API keys and access tokens.
+- Visit [API endpoint page](https://market.mashape.com/OSoMe/botometer) and look in the **Request Example -> X-Mashape-Key** to get the secret Mashape key for the botometer.
+- Copy and paste the keys and tokens to the respective variables and save the file.
 
 
 ## Usage
@@ -57,7 +57,7 @@ pip install botometer
  3. **Ngram frequencies and summary statistics**
     - This code returns a file that contains the frequency of specified ngram along with the user description length histogram.
     ```
-    python ngram_frequency.py -i <input file> -o <output file> -n <1|2|3|...>
+    python ngram_frequency.py -i <input file> -o <output file folder path> -n <1|2|3|...>
     ```
     - Here n refers to the type of ngram, 1 for unigram, 2 for bigram, 3 for trigram etc.
     - Pass `-h` as argument for the help menu.
