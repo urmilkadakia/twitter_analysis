@@ -3,6 +3,7 @@ import tweepy
 import json
 import api_keys
 import csv
+import time
 
 
 key_list = ['id', 'id', 'id_str', 'name', 'screen_name', 'location', 'description', "followers_count",
@@ -36,7 +37,17 @@ def getAuthentication():
     return api
 
 
-def genFile(inputfile, outputfile, format, clean_userid, clean_userid_file):
+def genFile(inputfilepath, outputfilepath, format, clean_userid):
+
+    timestr = time.strftime("%m_%d_%Y")
+    inputfile = open(inputfilepath, 'r')
+    if format == 'csv':
+        outputfile = csv.writer(open(outputfilepath + 'output_' + timestr + '.txt', "w+"))
+    else:
+        outputfile = open(outputfilepath + 'output_' + timestr + '.txt', "w+")
+    clean_userid_file = ''
+    if clean_userid:
+        clean_userid_file = csv.writer(open(outputfilepath + 'new_userid_list_' + timestr + '.csv', "w+"))
 
     # Authenticated tweepy api object
     api = getAuthentication()
@@ -51,11 +62,14 @@ def genFile(inputfile, outputfile, format, clean_userid, clean_userid_file):
     json_list = []
     header_flag = 0
 
+    length_of_file = sum(1 for line in inputfile)
+
+    inputfile = open(inputfilepath, 'r')
     for line in inputfile:
         user_id_all.append(int(float(line.strip())))
 
         # Call the lookup function for a list 100 user IDs
-        if count % 100 == 0:
+        if count % 100 == 0 or count == length_of_file:
             try:
                 status_object_list = api.lookup_users(user_ids=user_id_all)
             except:

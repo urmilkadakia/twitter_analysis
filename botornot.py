@@ -10,7 +10,11 @@ import csv
 from config import parse_args2
 
 
-def bot_or_not(inputfile, outputfile):
+def bot_or_not(inputfilepath, outputfilepath):
+
+    inputfile = open(inputfilepath)
+    outputfile = csv.writer(open(outputfilepath, "w+"))
+
     mashape_key = api_keys.mashape_key
     twitter_app_auth = {
         'consumer_key': api_keys.api_key,
@@ -25,10 +29,13 @@ def bot_or_not(inputfile, outputfile):
     count = 1
     failed_count = 0
     accounts = []
+    length_of_file = sum(1 for line in inputfile)
+
+    inputfile = open(inputfilepath)
     for line in inputfile:
-        accounts.append(int(line.strip()))
+        accounts.append(int(float(line.strip())))
         # Call the lookup function for a list 100 user IDs
-        if count % 100 == 0:
+        if count % 100 == 0 or count == length_of_file:
             for screen_name, result in bom.check_accounts_in(accounts):
                 if 'error' in result.keys():
                     outputfile.writerow([str(screen_name), 'error'])
@@ -36,7 +43,7 @@ def bot_or_not(inputfile, outputfile):
                     continue
                 outputfile.writerow([str(screen_name), str(result['cap']['universal'])])
             accounts.clear()
-            print(count)
+            # print(count)
         count += 1
     print(failed_count)
 
@@ -44,10 +51,7 @@ def bot_or_not(inputfile, outputfile):
 def main():
 
     args = parse_args2()
-    inputfile = open(args.inputfile)
-    outputfile = csv.writer(open(args.outputfile))
-
-    bot_or_not(inputfile, outputfile)
+    bot_or_not(args.inputfile, args.outputfile)
 
 
 if __name__ == "__main__":
