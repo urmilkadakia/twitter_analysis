@@ -52,7 +52,7 @@ def genFile(inputfile, outputfile, format, clean_userid, clean_userid_file):
     header_flag = 0
 
     for line in inputfile:
-        user_id_all.append(int(line.strip()))
+        user_id_all.append(int(float(line.strip())))
 
         # Call the lookup function for a list 100 user IDs
         if count % 100 == 0:
@@ -71,10 +71,6 @@ def genFile(inputfile, outputfile, format, clean_userid, clean_userid_file):
             # Store the converted user status data in the output file
             if format == "json":
                 json_list.extend(statuses)
-                # for status in statuses:
-                #     json_status = json.dumps(status)
-                #     outputfile.write(json_status)
-                #     outputfile.write("\n")
             # If defined format is csv then the following code snippet will store the user status
             # data into csv format in the output file
             else:
