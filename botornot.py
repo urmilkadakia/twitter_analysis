@@ -7,7 +7,7 @@
 import botometer
 import api_keys
 import csv
-from config import parse_args2
+from config import parse_args3
 
 
 def bot_or_not(inputfilepath, outputfilepath):
@@ -45,7 +45,7 @@ def bot_or_not(inputfilepath, outputfilepath):
             accounts.clear()
             # print(count)
         count += 1
-    print(failed_count)
+    print("Number of failed IDs:", failed_count)
 
 
 def main():

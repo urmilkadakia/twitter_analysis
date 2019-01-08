@@ -24,6 +24,7 @@ def parse_args():
 
     return args
 
+
 def parse_args2():
 
     parser = argparse.ArgumentParser()
@@ -33,6 +34,18 @@ def parse_args2():
                         help="Output file path")
     parser.add_argument("-n", dest="n", required=False,
                         help="Specify the ngram", default=1, type=int)
+    args = parser.parse_args()
+
+    return args
+
+
+def parse_args3():
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-i", dest="inputfile", required=True,
+                        help="Input file path", type=lambda x: is_valid_file(parser, x))
+    parser.add_argument("-o", dest="outputfile", required=True,
+                        help="Output file path")
     args = parser.parse_args()
 
     return args
