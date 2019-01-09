@@ -50,7 +50,7 @@ def bot_or_not(inputfilepath, outputfilepath):
 
 def main():
 
-    args = parse_args2()
+    args = parse_args3()
     bot_or_not(args.inputfile, args.outputfile)
 
 

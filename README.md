@@ -61,8 +61,16 @@ pip install botometer
     ```
     - Here n refers to the type of ngram, 1 for unigram, 2 for bigram, 3 for trigram etc.
     - Pass `-h` as argument for the help menu.
-  
-  4. **Crontab**
+    
+  4. **Most changing ngrams in terms of frequency** 
+     - This code will return 3 files, 2 for different ngram frequency of each input file for the specified ngram and the 3rd file contains the difference in the ngram frequencies between two files.    
+     ```
+     python most_changing_ngrams.py -i1 <input file 1> -i2 <input file 2> -o <output file folder path> -n <1|2|3|...>
+     ```
+     - Here n refers to the type of ngram, 1 for unigram, 2 for bigram, 3 for trigram etc.
+     - Pass `-h` as argument for the help menu.
+    
+  5. **Crontab**
      - The crontab runs the given tasks in the background at specific times. We can use the crontab to scrape the user profiles daily.
      - Follow the below commands to setup the crontab on your system:
        - open terminal
@@ -80,8 +88,9 @@ pip install botometer
        ```
        - The location or the name of the python interpreter may vary.
 
+
 ### License
-GNU
+Apache
 
 
 

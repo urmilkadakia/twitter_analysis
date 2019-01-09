@@ -11,10 +11,11 @@ mpl.use('Agg')
 import matplotlib.pyplot as plt
 nltk.download('punkt')
 import csv
-from config import parse_args2
+from config import parse_args4
+from ngrams_frequency import ngram_frequency_dist
 
 
-def ngram_frequency_dist(inputfile, outputfilepath, n=1):
+def count_ngrams_frequency(inputfile, n):
     with open(inputfile, "r") as f:
         json_list = json.load(f)
 
@@ -34,7 +35,29 @@ def ngram_frequency_dist(inputfile, outputfilepath, n=1):
     ngrams_list = ngrams(tokens, n)
     # get the frequency of each bigram in our corpus
     ngram_freq = collections.Counter(ngrams_list)
-    ngram_freq = ngram_freq.most_common()
+    # ngram_freq = ngram_freq.most_common()
+    ngram_freq = collections.OrderedDict(sorted(ngram_freq.items()))
+    return ngram_freq
+
+
+def changing_ngram(inputfile1, inputfile2,  outputfilepath, n=1):
+
+    ngram_freq1 = count_ngrams_frequency(inputfile1, n)
+    ngram_freq2 = count_ngrams_frequency(inputfile2, n)
+
+    ngram_freq = {}
+
+    for key in ngram_freq1.keys():
+        if key in ngram_freq2:
+            ngram_freq[key] = ngram_freq2[key] - ngram_freq1[key]
+        else:
+            ngram_freq[key] = -1*ngram_freq1[key]
+
+    for key in ngram_freq2:
+        if key not in ngram_freq:
+            ngram_freq[key] = ngram_freq2[key]
+
+    ngram_freq = sorted(ngram_freq.items(), key=lambda kv: kv[1], reverse=True)
 
     if n == 1:
         ngram_type = 'uni'
@@ -44,7 +67,7 @@ def ngram_frequency_dist(inputfile, outputfilepath, n=1):
         ngram_type = 'tri'
     else:
         ngram_type = str(n)
-    with open(outputfilepath + ngram_type + "gram.csv", "w+") as csvfile:
+    with open(outputfilepath + ngram_type + "gram_change_freq.csv", "w+") as csvfile:
         # fieldnames = ['number', 'colour', 'number2', 'count']
         writer = csv.writer(csvfile)
         # writer.writerow(fieldnames)
@@ -52,29 +75,10 @@ def ngram_frequency_dist(inputfile, outputfilepath, n=1):
             writer.writerow(item)
 
 
-def gen_histogram(inputfile, outputfilepath):
-
-    with open(inputfile, "r") as f:
-        json_list = json.load(f)
-
-    text_len = []
-    for user in json_list:
-        text_len.append(len(user['description']))
-
-    # An "interface" to matplotlib.axes.Axes.hist() method
-    n, bins, patches = plt.hist(x=text_len, bins=25, rwidth=0.9)
-    plt.xlabel('character length')
-    plt.ylabel('Frequency')
-    plt.title('Description character length distribution')
-    plt.savefig(outputfilepath + "histogram.png")
-
-
 def main():
 
-    args = parse_args2()
-    ngram_frequency_dist(args.inputfile, args.outputfile, args.n)
-
-    gen_histogram(args.inputfile, args.outputfile)
+    args = parse_args4()
+    changing_ngram(args.inputfile1, args.inputfile2, args.outputfile, args.n)
 
 
 if __name__ == "__main__":

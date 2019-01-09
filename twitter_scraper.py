@@ -4,6 +4,8 @@ import json
 import api_keys
 import csv
 import time
+import zipfile
+import os
 
 
 key_list = ['id', 'id', 'id_str', 'name', 'screen_name', 'location', 'description', "followers_count",
@@ -39,12 +41,12 @@ def getAuthentication():
 
 def genFile(inputfilepath, outputfilepath, format, clean_userid):
 
-    timestr = time.strftime("%m_%d_%Y")
+    timestr = time.strftime("%Y_%m_%d")
     inputfile = open(inputfilepath, 'r')
     if format == 'csv':
-        outputfile = csv.writer(open(outputfilepath + 'output_' + timestr + '.txt', "w+"))
+        outputfile = csv.writer(open(outputfilepath + timestr + '_profiles_2017_250k' + '.csv', "w+"))
     else:
-        outputfile = open(outputfilepath + 'output_' + timestr + '.txt', "w+")
+        outputfile = open(outputfilepath + timestr + '_profiles_2017_250k' + '.txt', "w+")
     clean_userid_file = ''
     if clean_userid:
         clean_userid_file = csv.writer(open(outputfilepath + 'new_userid_list_' + timestr + '.csv', "w+"))
@@ -62,7 +64,7 @@ def genFile(inputfilepath, outputfilepath, format, clean_userid):
     json_list = []
     header_flag = 0
 
-    length_of_file = sum(1 for line in inputfile)
+    length_of_file = len(inputfile.readlines())
 
     inputfile = open(inputfilepath, 'r')
     for line in inputfile:
@@ -112,6 +114,11 @@ def genFile(inputfilepath, outputfilepath, format, clean_userid):
     if format == 'json':
         json_status = json.dumps(json_list)
         outputfile.write(json_status)
+        os.chdir(outputfilepath)
+        zipfile.ZipFile(timestr + '_profiles_2017_250k' + '.txt.zip', mode='w').write(timestr + '_profiles_2017_250k' + '.txt')
+    else:
+        os.chdir(outputfilepath)
+        zipfile.ZipFile(timestr + '_profiles_2017_250k' + '.csv.zip', mode='w').write(timestr + '_profiles_2017_250k' + '.csv')
 
     print("failed_IDs:", user_id_failed)
     print("Number of failed ID:", len(user_id_failed))
