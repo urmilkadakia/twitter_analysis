@@ -62,13 +62,14 @@ def genFile(inputfilepath, outputfilepath, format, clean_userid):
     json_list = []
     header_flag = 0
 
-    length_of_file = sum(1 for line in inputfile)
+    length_of_file = len(inputfile.readlines())
 
     inputfile = open(inputfilepath, 'r')
     for line in inputfile:
         user_id_all.append(int(float(line.strip())))
 
         # Call the lookup function for a list 100 user IDs
+        print(count, length_of_file)
         if count % 100 == 0 or count == length_of_file:
             try:
                 status_object_list = api.lookup_users(user_ids=user_id_all)
