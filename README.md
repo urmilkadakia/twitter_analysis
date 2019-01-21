@@ -90,7 +90,7 @@ pip install botometer
 
 
 ### License
-GNU
+Apache
 
 
 
