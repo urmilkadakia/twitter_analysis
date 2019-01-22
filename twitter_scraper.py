@@ -121,6 +121,6 @@ def genFile(inputfilepath, outputfilepath, format, clean_userid):
         os.chdir(outputfilepath)
         zipfile.ZipFile(timestr + '_profiles_2017_250k' + '.csv.zip', mode='w').write(timestr + '_profiles_2017_250k' + '.csv')
         os.remove(timestr + '_profiles_2017_250k' + '.csv')
-        
+
     print("failed_IDs:", user_id_failed)
     print("Number of failed ID:", len(user_id_failed))

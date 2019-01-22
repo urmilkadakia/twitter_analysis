@@ -77,20 +77,23 @@ def daily_unigram_collector(inputfile, outputfile):
     ngram_freq = collections.Counter(ngrams_list)
     ngram_freq = ngram_freq.most_common()
 
+    # Creating the new row to add to the daily collector file
     new_row1 = {}
     new_row1['Date'] = [time.strftime("%Y_%m_%d")]
     for item, val in ngram_freq:
         new_row1[item[0]] = [val]
     new_row = pd.DataFrame(new_row1)
+    # Setting the index key to the Date
     new_row.set_index('Date', inplace=True)
 
+    # Checking the file exist or not
+    # If no then generate a new one or append the line at the end of the file
     if not os.path.exists(outputfile + 'combine.csv'):
         unigram_conbined = new_row
     else:
         unigram_original = pd.read_csv(outputfile + 'combine.csv', index_col=0)
         unigram_conbined = pd.concat([unigram_original, new_row], sort=False, ignore_index=True)
         unigram_conbined.drop(['0501201'], inplace=True, axis=1)
-
     unigram_conbined.to_csv(outputfile + 'combine.csv')
 
 
@@ -111,18 +114,29 @@ def gen_histogram(inputfile, outputfilepath):
     plt.savefig(outputfilepath + "histogram.png")
 
 
-def gen_histogram1(inputfile, outputfilepath):
+def gen_histogram1(inputfile, outputfilepath, n=1):
 
     ngram_frequency_dist(inputfile, outputfilepath, n=1)
     data = pd.read_csv(outputfilepath + "uni" + "gram.csv")
 
-    # An "interface" to matplotlib.axes.Axes.hist() method
-    # n, bins, patches = plt.hist(x=text_len, bins=25, rwidth=0.9)
-    plt.bar(data.ix[:, 0], data.ix[:, -1])
+    plt.figure(num=None, figsize=(16, 10), dpi=300, facecolor='w', edgecolor='k')
+
+    # Checking the ngram is unigram or not
+    if n == 1:
+        xdata = []
+        for item in data.ix[:, 0]:
+            xdata.append(item[2:-3])
+    else:
+        xdata = data.ix[:, 0]
+    ydata = data.ix[:, -1]
+
+    # Plotting the top 50 ngrams of the given file
+    plt.bar(xdata[:50], ydata[:50])
     plt.xlabel('character length')
+    plt.xticks(xdata[:50], xdata[:50], rotation='vertical')
     plt.ylabel('Frequency')
     plt.title('Description character length distribution')
-    plt.savefig(outputfilepath + "histogram.png")
+    plt.savefig(outputfilepath + "ngram_frequency.png")
 
 
 def main():
@@ -130,8 +144,8 @@ def main():
     args = parse_args2()
     # ngram_frequency_dist(args.inputfile, args.outputfile, args.n)
 
-    daily_unigram_collector(args.inputfile, args.outputfile)
-    # gen_histogram1(args.inputfile, args.outputfile)
+    # daily_unigram_collector(args.inputfile, args.outputfile)
+    gen_histogram1(args.inputfile, args.outputfile, n=1)
 
 
 if __name__ == "__main__":
