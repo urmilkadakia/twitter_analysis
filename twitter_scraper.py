@@ -115,11 +115,15 @@ def genFile(inputfilepath, outputfilepath, format, clean_userid):
         json_status = json.dumps(json_list)
         outputfile.write(json_status)
         os.chdir(outputfilepath)
-        zipfile.ZipFile(timestr + '_profiles_2017_250k' + '.txt.zip', mode='w').write(timestr + '_profiles_2017_250k' + '.txt')
+        zipf = zipfile.ZipFile(timestr + '_profiles_2017_250k' + '.txt.zip', 'w', zipfile.ZIP_DEFLATED)
+        zipf.write(timestr + '_profiles_2017_250k' + '.txt')
+        zipf.close()
         os.remove(timestr + '_profiles_2017_250k' + '.txt')
     else:
         os.chdir(outputfilepath)
-        zipfile.ZipFile(timestr + '_profiles_2017_250k' + '.csv.zip', mode='w').write(timestr + '_profiles_2017_250k' + '.csv')
+        zipf = zipfile.ZipFile(timestr + '_profiles_2017_250k' + '.csv.zip', 'w', zipfile.ZIP_DEFLATED)
+        zipf.write(timestr + '_profiles_2017_250k' + '.csv')
+        zipf.close()
         os.remove(timestr + '_profiles_2017_250k' + '.csv')
 
     print("failed_IDs:", user_id_failed)
