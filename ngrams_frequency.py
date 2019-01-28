@@ -1,21 +1,19 @@
 import json
 import nltk
-# from nltk.collocations import *
 from nltk.util import ngrams
 from nltk.tokenize import TweetTokenizer
 import collections
 import re
 import string
+import csv
+import pandas as pd
+import os
+import glob
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
 nltk.download('punkt')
-import csv
-import pandas as pd
 from config import parse_args2
-import os
-import time
-import glob
 
 
 def ngram_frequency_dist(inputfile, outputfilepath, n=1):
@@ -33,7 +31,6 @@ def ngram_frequency_dist(inputfile, outputfilepath, n=1):
     # Splits the sentences into words
     tknzr = TweetTokenizer(strip_handles=True, reduce_len=True)
     tokens = tknzr.tokenize(text)
-    # tokens = nltk.word_tokenize(text)
 
     ngrams_list = ngrams(tokens, n)
     # get the frequency of each ngram in our corpus
@@ -49,7 +46,6 @@ def ngram_frequency_dist(inputfile, outputfilepath, n=1):
     else:
         ngram_type = str(n)
     with open(outputfilepath + ngram_type + "gram.csv", "w+") as csvfile:
-        # fieldnames = ['number', 'colour', 'number2', 'count']
         writer = csv.writer(csvfile)
         # writer.writerow(fieldnames)
         for item in ngram_freq:
@@ -57,7 +53,7 @@ def ngram_frequency_dist(inputfile, outputfilepath, n=1):
 
 
 def daily_unigram_collector(inputfilepath, outputfile):
-    for file in glob.glob(os.path.join(inputfilepath, 'output_*2019.txt')):
+    for file in glob.glob(os.path.join(inputfilepath, 'output_*10k.txt')):
         with open(file, "r") as f:
             json_list = json.load(f)
         text = ''
@@ -85,8 +81,6 @@ def daily_unigram_collector(inputfilepath, outputfile):
         for item, val in ngram_freq:
             new_row1[item[0]] = [val]
         new_row = pd.DataFrame(new_row1)
-        # Setting the index key to the Date
-        # new_row.set_index('Date', inplace=True)
 
         # Checking the file exist or not
         # If no then generate a new one or append the line at the end of the file
