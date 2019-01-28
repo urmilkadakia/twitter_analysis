@@ -12,7 +12,6 @@ import matplotlib.pyplot as plt
 nltk.download('punkt')
 import csv
 from config import parse_args4
-from ngrams_frequency import ngram_frequency_dist
 
 
 def count_ngrams_frequency(inputfile, n):
@@ -68,7 +67,6 @@ def changing_ngram(inputfile1, inputfile2,  outputfilepath, n=1):
     else:
         ngram_type = str(n)
     with open(outputfilepath + ngram_type + "gram_change_freq.csv", "w+") as csvfile:
-        # fieldnames = ['number', 'colour', 'number2', 'count']
         writer = csv.writer(csvfile)
         # writer.writerow(fieldnames)
         for item in ngram_freq:
