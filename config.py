@@ -1,6 +1,7 @@
 import argparse
 import os
 
+
 # Throws an error if the file does not exists at the given location
 def is_valid_file(parser, arg):
     if not os.path.exists(arg):
@@ -49,6 +50,7 @@ def parse_args3():
     args = parser.parse_args()
 
     return args
+
 
 def parse_args4():
 
