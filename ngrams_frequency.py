@@ -9,6 +9,7 @@ import csv
 import pandas as pd
 import os
 import glob
+import numpy as np
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
@@ -52,7 +53,7 @@ def ngram_frequency_dist(inputfile, outputfilepath, n=1):
             writer.writerow(item)
 
 
-def daily_unigram_collector(inputfilepath, outputfile):
+def daily_unigram_collector(inputfilepath, outputfile, freq):
     for file in glob.glob(os.path.join(inputfilepath, 'output_*10k.txt')):
         with open(file, "r") as f:
             json_list = json.load(f)
@@ -82,13 +83,23 @@ def daily_unigram_collector(inputfilepath, outputfile):
             new_row1[item[0]] = [val]
         new_row = pd.DataFrame(new_row1)
 
+        new_row1 = pd.DataFrame()
+        for col in list(new_row.columns):
+            if col == 'Date':
+                new_row1[col] = new_row[col]
+                continue
+            if new_row[col][0] > freq:
+                new_row1[col] = new_row[col]
+
+
         # Checking the file exist or not
         # If no then generate a new one or append the line at the end of the file
         if not os.path.exists(outputfile):
-            unigram_combined = new_row
+            unigram_combined = new_row1
         else:
             unigram_original = pd.read_csv(outputfile, index_col=0)
-            unigram_combined = pd.concat([unigram_original, new_row], sort=False, ignore_index=True, axis=0)
+            unigram_combined = pd.concat([unigram_original, new_row1], sort=False, ignore_index=True, axis=0)
+        unigram_combined.replace(np.nan, 0, inplace=True)
         unigram_combined.to_csv(outputfile)
 
 
@@ -139,7 +150,7 @@ def main():
     args = parse_args2()
     # ngram_frequency_dist(args.inputfile, args.outputfile, args.n)
 
-    daily_unigram_collector(args.inputfile, args.outputfile)
+    daily_unigram_collector(args.inputfile, args.outputfile, args.n)
     # gen_histogram1(args.inputfile, args.outputfile, n=1)
 
 
