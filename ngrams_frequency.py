@@ -10,6 +10,7 @@ import pandas as pd
 import os
 import glob
 import numpy as np
+import zipfile
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
@@ -54,9 +55,12 @@ def ngram_frequency_dist(inputfile, outputfilepath, n=1):
 
 
 def daily_unigram_collector(inputfilepath, outputfile, freq):
-    for file in glob.glob(os.path.join(inputfilepath, 'output_*10k.txt')):
-        with open(file, "r") as f:
-            json_list = json.load(f)
+    for file in glob.glob(os.path.join(inputfilepath, 'output_*_10k.zip')):
+        with zipfile.ZipFile(file, 'r') as z:
+            for filename in z.namelist():
+                print(filename)
+                with z.open(filename) as f:
+                    json_list = json.load(f)
         text = ''
         for user in json_list:
             text += user['description'].lower() + " "
@@ -186,8 +190,8 @@ def main():
     args = parse_args2()
     # ngram_frequency_dist(args.inputfile, args.outputfile, args.n)
 
-    # daily_unigram_collector(args.inputfile, args.outputfile, args.n)
-    get_locations(args.inputfile, args.outputfile)
+    daily_unigram_collector(args.inputfile, args.outputfile, args.n)
+    # get_locations(args.inputfile, args.outputfile)
     # gen_histogram1(args.inputfile, args.outputfile, n=1)
 
 
