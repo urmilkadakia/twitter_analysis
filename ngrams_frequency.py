@@ -103,7 +103,7 @@ def daily_unigram_collector(inputfilepath, outputfile, freq):
         unigram_combined.to_csv(outputfile)
 
 
-def gen_histogram(inputfile, outputfilepath):
+def char_length_histogram(inputfile, outputfilepath):
 
     with open(inputfile, "r") as f:
         json_list = json.load(f)
@@ -120,7 +120,7 @@ def gen_histogram(inputfile, outputfilepath):
     plt.savefig(outputfilepath + "histogram.png")
 
 
-def gen_histogram1(inputfile, outputfilepath, n=1):
+def ngram_histogram(inputfile, outputfilepath, n=1):
 
     ngram_frequency_dist(inputfile, outputfilepath, n=1)
     data = pd.read_csv(outputfilepath + "uni" + "gram.csv")
@@ -145,12 +145,49 @@ def gen_histogram1(inputfile, outputfilepath, n=1):
     plt.savefig(outputfilepath + "ngram_frequency.png")
 
 
+def get_locations(inputfile, outputfile):
+    with open(inputfile, "r") as f:
+        json_list = json.load(f)
+    df = pd.read_csv('/home/urmilkadakia/Desktop/Masters/Social_behavioral/twitter_analysis/OUTPUT/uscitiesv1.4.csv')
+    us_locations = set()
+
+    for index, row in df.iterrows():
+        if row[0]:
+            us_locations.add(re.sub(r"[^a-zA-Z]+", ' ', row[0]).lower())
+        if row[2]:
+            us_locations.add(re.sub(r"[^a-zA-Z]+", ' ', row[2]).lower())
+        if row[3]:
+            us_locations.add(re.sub(r"[^a-zA-Z]+", ' ', row[3]).lower())
+        if row[5]:
+            us_locations.add(re.sub(r"[^a-zA-Z]+", ' ', row[5]).lower())
+    us_locations.add('us')
+    us_locations.add('usa')
+    location_dict = {}
+    for item in json_list:
+        location_dict[item['id']] = re.split(r'[`\-=~!@#$%^&*()_+\[\]{};\'\\:"|<,./<>?]', item['location'].lower())
+    flag = 0
+    for id in location_dict:
+        for item in location_dict[id]:
+            if item.strip() in us_locations:
+                location_dict[id] = 'USA'
+                flag = 1
+                break
+        if flag == 0:
+            location_dict[id] = 'Not in USA'
+        else:
+            flag = 0
+    location_dict.to_csv(outputfile)
+
+
+
+
 def main():
 
     args = parse_args2()
     # ngram_frequency_dist(args.inputfile, args.outputfile, args.n)
 
-    daily_unigram_collector(args.inputfile, args.outputfile, args.n)
+    # daily_unigram_collector(args.inputfile, args.outputfile, args.n)
+    get_locations(args.inputfile, args.outputfile)
     # gen_histogram1(args.inputfile, args.outputfile, n=1)
 
 
