@@ -54,57 +54,63 @@ def ngram_frequency_dist(inputfile, outputfilepath, n=1):
             writer.writerow(item)
 
 
+def dateSort(file):
+    date = re.findall(r'[0-9]{2}_[0-9]{2}_[0-9]{4}', file)[0]
+    date = int(''.join(date.split('_')))
+    return date
+
+
 def daily_unigram_collector(inputfilepath, outputfile, freq):
-    for file in glob.glob(os.path.join(inputfilepath, 'output_*_10k.zip')):
+    for file in sorted(glob.glob(os.path.join(inputfilepath, '*.zip')), key=dateSort):
         with zipfile.ZipFile(file, 'r') as z:
             for filename in z.namelist():
                 print(filename)
                 with z.open(filename) as f:
                     json_list = json.load(f)
-        text = ''
-        for user in json_list:
-            text += user['description'].lower() + " "
+                    text = ''
+                    for user in json_list:
+                        text += user['description'].lower() + " "
 
-        # get rid of punctuation (except periods!)
-        punctuation_no_period = "[" + re.sub("\.", "", string.punctuation) + "]"
-        text = re.sub(punctuation_no_period, "", text)
+                    # get rid of punctuation (except periods!)
+                    punctuation_no_period = "[" + re.sub("\.", "", string.punctuation) + "]"
+                    text = re.sub(punctuation_no_period, "", text)
 
-        # Splits the sentences into words
-        tknzr = TweetTokenizer(strip_handles=True, reduce_len=True)
-        tokens = tknzr.tokenize(text)
-        # tokens = nltk.word_tokenize(text)
+                    # Splits the sentences into words
+                    tknzr = TweetTokenizer(strip_handles=True, reduce_len=True)
+                    tokens = tknzr.tokenize(text)
+                    # tokens = nltk.word_tokenize(text)
 
-        ngrams_list = list(ngrams(tokens, 1))
-        # get the frequency of each ngram in our corpus
-        ngram_freq = collections.Counter(ngrams_list)
-        ngram_freq = ngram_freq.most_common()
+                    ngrams_list = list(ngrams(tokens, 1))
+                    # get the frequency of each ngram in our corpus
+                    ngram_freq = collections.Counter(ngrams_list)
+                    ngram_freq = ngram_freq.most_common()
 
-        # Creating the new row to add to the daily collector file
-        new_row1 = {}
-        # Extracting the Date from the filename
-        new_row1['Date'] = re.findall(r'[0-9]{2}_[0-9]{2}_[0-9]{4}', file)[0]
-        for item, val in ngram_freq:
-            new_row1[item[0]] = [val]
-        new_row = pd.DataFrame(new_row1)
+                    # Creating the new row to add to the daily collector file
+                    new_row1 = {}
+                    # Extracting the Date from the filename
+                    new_row1['Date'] = re.findall(r'[0-9]{2}_[0-9]{2}_[0-9]{4}', file)[0]
+                    for item, val in ngram_freq:
+                        new_row1[item[0]] = [val]
+                    new_row = pd.DataFrame(new_row1)
 
-        new_row1 = pd.DataFrame()
-        for col in list(new_row.columns):
-            if col == 'Date':
-                new_row1[col] = new_row[col]
-                continue
-            if new_row[col][0] > freq:
-                new_row1[col] = new_row[col]
+                    new_row1 = pd.DataFrame()
+                    for col in list(new_row.columns):
+                        if col == 'Date':
+                            new_row1[col] = new_row[col]
+                            continue
+                        if new_row[col][0] > freq:
+                            new_row1[col] = new_row[col]
 
 
-        # Checking the file exist or not
-        # If no then generate a new one or append the line at the end of the file
-        if not os.path.exists(outputfile):
-            unigram_combined = new_row1
-        else:
-            unigram_original = pd.read_csv(outputfile, index_col=0)
-            unigram_combined = pd.concat([unigram_original, new_row1], sort=False, ignore_index=True, axis=0)
-        unigram_combined.replace(np.nan, 0, inplace=True)
-        unigram_combined.to_csv(outputfile)
+                    # Checking the file exist or not
+                    # If no then generate a new one or append the line at the end of the file
+                    if not os.path.exists(outputfile):
+                        unigram_combined = new_row1
+                    else:
+                        unigram_original = pd.read_csv(outputfile, index_col=0)
+                        unigram_combined = pd.concat([unigram_original, new_row1], sort=False, ignore_index=True, axis=0)
+                    unigram_combined.replace(np.nan, 0, inplace=True)
+                    unigram_combined.to_csv(outputfile)
 
 
 def char_length_histogram(inputfile, outputfilepath):
