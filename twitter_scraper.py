@@ -16,7 +16,6 @@ class Twitter_Scraper:
     def __init__(self, inputfilepath, outputfilepath):
         """
         Method to initialized the class data members
-
         :param inputfilepath: User input for path to the input file
         :param outputfilepath: User input for path to the output file
 
@@ -36,7 +35,6 @@ class Twitter_Scraper:
     def flatten_json(y):
         """
         Method to convert the multilayer JSON to 1 dimention row vector
-
         :return: flattern json dictionary
         """
         out = {}
@@ -57,7 +55,6 @@ class Twitter_Scraper:
         Method to send the api calls to twitter and get the user data in the json format. The method stores all the
         data in the user specified format(json or csv) in the zip file format to reduce the storage space and also
         prints out the list of failed user ids.
-
         :param format: format of output file json or csv
         :param clean_userid: a flag to store the list of user ids for which we get the data without any error. Pass 1
                              to store the list as csv file.
