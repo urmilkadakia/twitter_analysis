@@ -15,14 +15,15 @@ import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
 nltk.download('punkt')
-from config import parse_args2, parse_args4
+from util import date_sort
 
 
 def count_ngrams_frequency(inputfile, n):
     """
     The function will count the frequencies for the given ngram
     :param inputfile: Path to the input file
-    :param n: n represents the n in n-gram which is a contiguous sequence of n items
+    :param n: n represents the n in n-gram which is a contiguous sequence of n items. The default vale is 1 which
+              represents unigrams.
     :return: Returns the dictionary of ngram and frequency as the key value pairs sorted in the decreasing order.
     """
     with zipfile.ZipFile(inputfile, 'r') as z:
@@ -73,7 +74,7 @@ def changing_ngram(inputfile1, inputfile2,  outputfile, n=1):
     :param inputfile1: Path to the input file 1
     :param inputfile2: Path to the input file 2
     :param outputfile: Path to the output file
-    :param n: n represents the n in n-gram which is a contiguous sequence of n items
+    :param n: n represents the n in n-gram which is a contiguous sequence of n items.
     """
 
     ngram_freq1 = count_ngrams_frequency(inputfile1, n)
@@ -101,18 +102,7 @@ def changing_ngram(inputfile1, inputfile2,  outputfile, n=1):
             writer.writerow(item)
 
 
-def date_sort(file):
-    """
-    The function extracts the date from the filename and return it
-    :param file: the name of the file in the string format
-    :return: the extracted date from the filename as an integer of form yyyymmdd
-    """
-    date = re.findall(r'[0-9]{2}_[0-9]{2}_[0-9]{4}', file)[0]
-    date = int(''.join(date.split('_')))
-    return date
-
-
-def daily_ngram_collector(inputfilepath, outputfile, n=1, cutoff_freq=2):
+def daily_ngram_collector(inputfilepath, outputfile, n=1, cutoff_freq=5):
     """
     The function reads all the files that are in the input file folder and counts the ngram frequencies for all
     the ngrams in the file and finally combine them all in a date vise sorted csv file.
@@ -121,7 +111,7 @@ def daily_ngram_collector(inputfilepath, outputfile, n=1, cutoff_freq=2):
     :param n: n represents the n in n-gram which is a contiguous sequence of n items. The default vale is 1 which
               represents unigrams.
     :param cutoff_freq: The ngrams that has less frequency than the cut off frequency will not be included in the
-                        output file. The default value is 10.
+                        output file. The default value is 5.
     """
     for file in sorted(glob.glob(os.path.join(inputfilepath, '*2019.zip')), key=date_sort):
         ngram_freq = count_ngrams_frequency(file, n=n)
@@ -183,16 +173,16 @@ def char_length_histogram(inputfile, outputfile):
     plt.savefig(outputfile)
 
 
-def ngram_histogram(inputfile, outputfile, cutoff_freq, n=1):
+def ngram_histogram(inputfile, outputfile, n=1, cutoff_freq=5):
     """
     The function to plot and store the histogram of the specified ngram and their frequencies for the ngrams which has
     frequency greater than cutoff_freq
     :param inputfile: Path to input file
     :param outputfile: Path to output file
-    :param cutoff_freq: The ngrams that has less frequency than the cut off frequency will not be included in the
-                        output file
     :param n: n represents the n in n-gram which is a contiguous sequence of n items. The default vale is 1 which
               represents unigrams.
+    :param cutoff_freq: The ngrams that has less frequency than the cut off frequency will not be included in the
+                        output file.  The default value is 5.
     """
     ngram_freq = count_ngrams_frequency(inputfile, n)
     ngram_freq = ngram_freq.most_common()
@@ -303,18 +293,3 @@ def get_locations(inputfile, outputfile):
         for data in location_dict:
             writer.writerow([data, location_dict[data]])
 
-
-def main():
-
-    args = parse_args2()
-    # changing_ngram(args.inputfile, args.inputfile, args.outputfile, args.n)
-    # ngram_frequency_dist(args.inputfile, args.outputfile, args.n)
-
-    daily_ngram_collector(args.inputfile, args.outputfile, args.n)
-    # get_locations(args.inputfile, args.outputfile)
-    # ngram_histogram(args.inputfile, args.outputfile, 10, 1)
-    # char_length_histogram(args.inputfile, args.outputfile)
-
-
-if __name__ == "__main__":
-    main()
