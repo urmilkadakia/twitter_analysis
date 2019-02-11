@@ -42,7 +42,7 @@ pip install botometer
    - This code takes the list the userids as input and return 2 files. The first file contains the user lookups and second file contains the a list of userids that are are not unknown, suspended or deleted.
    - Use the following command to run profile_collector.py on terminal:
    ```
-   python profile_collector.py -i <input file> -o <output file folder path> -f <json|csv> -u <1|0>
+   python profile_collector.py -i1 <input file> -o <output file folder path> -f <json|csv> -u <1|0>
    ```
    - Pass `-h` as argument for help menu.
    
@@ -50,7 +50,7 @@ pip install botometer
     - This code returns a file which contains the botometer score for each user.
     - Use the following command to run botornot.py on terminal:
     ```
-    python botornot.py -i <input file> -o <output file>
+    python botornot.py -i1 <input file> -o <output file>
     ```
     - Pass `-h` as argument for the help menu.
     
@@ -70,7 +70,7 @@ pip install botometer
      - Here n refers to the type of ngram, 1 for unigram, 2 for bigram, 3 for trigram etc.
      - Pass `-h` as argument for the help menu.
     
-  5. **Crontab**
+  ## Crontab
      - The crontab runs the given tasks in the background at specific times. We can use the crontab to scrape the user profiles daily.
      - Follow the below commands to setup the crontab on your system:
        - open terminal
