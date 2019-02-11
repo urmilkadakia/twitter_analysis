@@ -62,50 +62,49 @@ pip install botometer
               represents unigrams.
     - return: Returns the dictionary of ngram and frequency as the key value pairs sorted in the decreasing order.  
     
-  4. **ngram_analysis.ngram_frequency_dist()**
+ 4. **ngram_analysis.ngram_frequency_dist()**
      - The function counts the frequency of each ngram specified by the input parameter n and store the output as the csv at the output file location.
      - Parameters:
        - input_file: Path to the input file
        - output_file: Path to the output file
        - n represents the n in n-gram which is a contiguous sequence of n item
-  5. **ngram_analysis.changing_ngram()**
+ 5. **ngram_analysis.changing_ngram()**
      - The function counts the difference between the frequencies of the two given files for the specified ngram and store it in the output file path folder.
      - Parameteres:
        - input_file1: Path to the input file 1
        - input_file2: Path to the input file 2
        - output_file: Path to the output file
        - n: n represents the n in n-gram which is a contiguous sequence of n items.
-    6. **ngram_analysis.daily_ngram_collector()**
-       - The function reads all the files that are in the input file folder and counts the ngram frequencies for all the ngrams in the file and finally combine them all in a date vise sorted csv file.
-       - Parameters:
-         - input_file_path: Path to the folder in which input files are stored
-         - output_file: Path to the output file
-         - n: n represents the n in n-gram which is a contiguous sequence of n items. The default vale is 1 which
-              represents unigrams.
-         - cutoff_freq: The ngrams that has less frequency than the cut off frequency will not be included in the
-                        output file. The default value is 5.
-      7. **ngram_analysis.char_length_histogram()**
-         - The function to plot and store the histogram of the character length description of each user in the file
-         - Parameters:
-           - input_file: Path to the input file
-           - output_file: Path to the output file
-       8. **ngram_analysis.ngram_histogram()**
-          - The function to plot and store the histogram of the specified ngram and their frequencies for the ngrams which has frequency greater than cutoff_freq
-          - Parameters:
-            - input_file: Path to input file
-            - output_file: Path to output file
-            - n: n represents the n in n-gram which is a contiguous sequence of n items. The default vale is 1 which
-                 represents unigrams.
-            - cutoff_freq: The ngrams that has less frequency than the cut off frequency will not be included in the
+ 6. **ngram_analysis.daily_ngram_collector()**
+     - The function reads all the files that are in the input file folder and counts the ngram frequencies for all the ngrams in the file and finally combine them all in a date vise sorted csv file.
+     - Parameters:
+       - input_file_path: Path to the folder in which input files are stored
+       - output_file: Path to the output file
+       - n: n represents the n in n-gram which is a contiguous sequence of n items. The default vale is 1 which
+            represents unigrams.
+       - cutoff_freq: The ngrams that has less frequency than the cut off frequency will not be included in the
+                      output file. The default value is 5.
+ 7. **ngram_analysis.char_length_histogram()**
+     - The function to plot and store the histogram of the character length description of each user in the file
+     - Parameters:
+       - input_file: Path to the input file
+       - output_file: Path to the output file
+ 8. **ngram_analysis.ngram_histogram()**
+     - The function to plot and store the histogram of the specified ngram and their frequencies for the ngrams which has frequency greater than cutoff_freq
+     - Parameters:
+       - input_file: Path to input file
+       - output_file: Path to output file
+       - n: n represents the n in n-gram which is a contiguous sequence of n items. The default vale is 1 which
+            represents unigrams.
+       - cutoff_freq: The ngrams that has less frequency than the cut off frequency will not be included in the
                            output file. The default value is 5.
-        9. **ngram_analysis.get_locations()**
-           - The function writes the user id and his/her us state name in the output file based on the the value of location key in the user information and state_location dictionary. If function does not find the location in the state_locations dictionary then not in usa will be written against the user id.
-           - Parameters:
-             - input_file1: Path to input file
-             - input_file2: Path to the usa location file
-             - output_file: Path to output file
-    
-  ## Crontab
+ 9. **ngram_analysis.get_locations()**
+     - The function writes the user id and his/her us state name in the output file based on the the value of location key in the user information and state_location dictionary. If function does not find the location in the state_locations dictionary then not in usa will be written against the user id.
+     - Parameters:
+       - input_file1: Path to input file
+       - input_file2: Path to the usa location file
+       - output_file: Path to output file
+## Crontab
      - The crontab runs the given tasks in the background at specific times. We can use the crontab to scrape the user profiles daily.
      - Follow the below commands to setup the crontab on your system:
        - open terminal
