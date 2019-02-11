@@ -1,19 +1,18 @@
-### requirements install botometer client and mashape API key
-### command: pip install botometer
-### ref: https://github.com/IUNetSci/botometer-python, https://market.mashape.com/OSoMe/botometer
-
-### Rate limit : Our rate limit is set at 2,000 requests per day, per user
-
 import botometer
 import api_keys
 import csv
-from config import parse_args3
+from util import parse_args
 
 
-def bot_or_not(inputfilepath, outputfilepath):
-
-    inputfile = open(inputfilepath)
-    outputfile = csv.writer(open(outputfilepath, "w+"))
+def bot_or_not(input_file_path, output_file_path):
+    """
+    The function decides whether each user id is a bot machine or human being and stores the user id and botometer
+    scores in the input
+    :param input_file_path: Path to input file
+    :param output_file_path: Path to output file
+    """
+    input_file = open(input_file_path)
+    output_file = csv.writer(open(output_file_path, "w+"))
 
     mashape_key = api_keys.mashape_key
     twitter_app_auth = {
@@ -29,31 +28,29 @@ def bot_or_not(inputfilepath, outputfilepath):
     count = 1
     failed_count = 0
     accounts = []
-    length_of_file = sum(1 for line in inputfile)
+    length_of_file = sum(1 for _ in input_file)
 
-    inputfile = open(inputfilepath)
-    for line in inputfile:
+    input_file = open(input_file_path)
+    for line in input_file:
         accounts.append(int(float(line.strip())))
         # Call the lookup function for a list 100 user IDs
         if count % 100 == 0 or count == length_of_file:
             for screen_name, result in bom.check_accounts_in(accounts):
                 if 'error' in result.keys():
-                    outputfile.writerow([str(screen_name), 'error'])
+                    output_file.writerow([str(screen_name), 'error'])
                     failed_count += 1
                     continue
-                outputfile.writerow([str(screen_name), str(result['cap']['universal'])])
+                output_file.writerow([str(screen_name), str(result['cap']['universal'])])
             accounts.clear()
-            # print(count)
         count += 1
     print("Number of failed IDs:", failed_count)
 
 
 def main():
 
-    args = parse_args3()
-    bot_or_not(args.inputfile, args.outputfile)
+    args = parse_args()
+    bot_or_not(args.input_file1, args.output_file)
 
 
 if __name__ == "__main__":
     main()
-

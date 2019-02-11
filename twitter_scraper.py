@@ -22,7 +22,8 @@ class TwitterScraper:
         :param input_file: User input for path to the input file
         :param output_file: User input for path to the output folder
 
-        key_list: data member that contains the list of columns names for the csv output file
+        api: Data member in the form of tweepy OAuthHandler object
+
         """
 
         auth = tweepy.OAuthHandler(api_keys.api_key, api_keys.api_secret_key)
@@ -30,8 +31,8 @@ class TwitterScraper:
 
         # wait_on_rate_limit will put the running code on sleep and will resume it after rate limit time
         self.api = tweepy.API(auth_handler=auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
-        self.inputfilepath = input_file
-        self.outputfilepath = output_file
+        self.input_file_path = input_file
+        self.output_file_path = output_file
 
     def generate_file(self, format=json, clean_userid=0):
         """
@@ -43,16 +44,16 @@ class TwitterScraper:
                              to store the list as csv file.
         """
 
-        timestr = time.strftime("%Y_%m_%d")
-        inputfile = open(self.inputfilepath, 'r')
+        time_str = time.strftime("%Y_%m_%d")
+        input_file = open(self.input_file_path, 'r')
 
         if format == 'csv':
-            outputfile = csv.writer(open(self.outputfilepath + timestr + '_profiles_2017_250k' + '.csv', "w+"))
+            output_file = csv.writer(open(self.output_file_path + time_str + '_profiles_2017_250k' + '.csv', "w+"))
         else:
-            outputfile = open(self.outputfilepath + timestr + '_profiles_2017_250k' + '.txt', "w+")
+            output_file = open(self.output_file_path + time_str + '_profiles_2017_250k' + '.txt', "w+")
         clean_userid_file = ''
         if clean_userid:
-            clean_userid_file = csv.writer(open(self.outputfilepath + 'new_userid_list_' + timestr + '.csv', "w+"))
+            clean_userid_file = csv.writer(open(self.output_file_path + 'new_userid_list_' + time_str + '.csv', "w+"))
 
         count = 1
         # user_if_all contains all the user IDs
@@ -64,9 +65,9 @@ class TwitterScraper:
         json_list = []
         header_flag = 0
 
-        length_of_file = len(inputfile.readlines())
+        length_of_file = len(input_file.readlines())
 
-        inputfile = open(self.inputfilepath, 'r')
+        inputfile = open(self.input_file_path, 'r')
         for line in inputfile:
             user_id_all.append(int(float(line.strip())))
 
@@ -99,9 +100,9 @@ class TwitterScraper:
                         # write the headers of each column in the output file
                         if header_flag == 0:
                             header = self.key_list
-                            outputfile.writerow(header)
+                            output_file.writerow(header)
                             header_flag = 1
-                        outputfile.writerow(status_list)
+                        output_file.writerow(status_list)
                 # Extending the list fo failed IDs after each call to api
                 user_id_failed.extend(list(set(user_id_all) - set(user_id_success)))
                 if clean_userid == 1:
@@ -114,18 +115,18 @@ class TwitterScraper:
         # Convert the original file to zip file to reduce the storage space
         if format == 'json':
             json_status = json.dumps(json_list)
-            outputfile.write(json_status)
-            os.chdir(self.outputfilepath)
-            zipf = zipfile.ZipFile(timestr + '_profiles_2017_250k' + '.txt.zip', 'w', zipfile.ZIP_DEFLATED)
-            zipf.write(timestr + '_profiles_2017_250k' + '.txt')
+            output_file.write(json_status)
+            os.chdir(self.output_file_path)
+            zipf = zipfile.ZipFile(time_str + '_profiles_2017_250k' + '.txt.zip', 'w', zipfile.ZIP_DEFLATED)
+            zipf.write(time_str + '_profiles_2017_250k' + '.txt')
             zipf.close()
-            os.remove(timestr + '_profiles_2017_250k' + '.txt')
+            os.remove(time_str + '_profiles_2017_250k' + '.txt')
         else:
-            os.chdir(self.outputfilepath)
-            zipf = zipfile.ZipFile(timestr + '_profiles_2017_250k' + '.csv.zip', 'w', zipfile.ZIP_DEFLATED)
-            zipf.write(timestr + '_profiles_2017_250k' + '.csv')
+            os.chdir(self.output_file_path)
+            zipf = zipfile.ZipFile(time_str + '_profiles_2017_250k' + '.csv.zip', 'w', zipfile.ZIP_DEFLATED)
+            zipf.write(time_str + '_profiles_2017_250k' + '.csv')
             zipf.close()
-            os.remove(timestr + '_profiles_2017_250k' + '.csv')
+            os.remove(time_str + '_profiles_2017_250k' + '.csv')
 
         print("failed_IDs:", user_id_failed)
         print("Number of failed ID:", len(user_id_failed))
