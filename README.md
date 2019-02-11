@@ -54,16 +54,15 @@ pip install botometer
     ```
     - Pass `-h` as argument for the help menu.
     
- 3. **Ngram frequencies and summary statistics**
-    - This code returns a file that contains the frequency of specified ngram along with the user description length histogram.
-    ```
-    python ngram_frequency.py -i <input file> -o <output file folder path> -n <1|2|3|...>
-    ```
-    - Here n refers to the type of ngram, 1 for unigram, 2 for bigram, 3 for trigram etc.
-    - Pass `-h` as argument for the help menu.
+ 3. **ngram_analysis.count_ngram_frequency()**
+    - This functions returns the dictionary of ngram and frequency as the key value pairs sorted in the decreasing order.    
     
   4. **Most changing ngrams in terms of frequency** 
-     - This code will return 3 files, 2 for different ngram frequency of each input file for the specified ngram and the 3rd file contains the difference in the ngram frequencies between two files.    
+     - The function will count the frequencies for the given ngram
+     -Parameters:
+      - input_file: Path to the input file
+      - n: n represents the n in n-gram which is a contiguous sequence of n items. The default vale is 1 which
+              represents unigrams.
      ```
      python most_changing_ngrams.py -i1 <input file 1> -i2 <input file 2> -o <output file folder path> -n <1|2|3|...>
      ```
