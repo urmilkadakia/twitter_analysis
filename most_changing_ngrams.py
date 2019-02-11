@@ -1,5 +1,6 @@
 import json
 import nltk
+import csv
 # from nltk.collocations import *
 from nltk.util import ngrams
 from nltk.tokenize import TweetTokenizer
@@ -10,7 +11,6 @@ import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
 nltk.download('punkt')
-import csv
 from config import parse_args4
 
 

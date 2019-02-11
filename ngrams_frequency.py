@@ -186,6 +186,7 @@ def get_locations(inputfile, outputfile):
             location_dict[id] = 'Not in USA'
         else:
             flag = 0
+    print(location_dict)
     location_dict.to_csv(outputfile)
 
 
@@ -196,8 +197,8 @@ def main():
     args = parse_args2()
     # ngram_frequency_dist(args.inputfile, args.outputfile, args.n)
 
-    daily_unigram_collector(args.inputfile, args.outputfile, args.n)
-    # get_locations(args.inputfile, args.outputfile)
+    # daily_unigram_collector(args.inputfile, args.outputfile, args.n)
+    get_locations(args.inputfile, args.outputfile)
     # gen_histogram1(args.inputfile, args.outputfile, n=1)
 
 
