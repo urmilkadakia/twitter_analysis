@@ -1,4 +1,3 @@
-import sys
 import tweepy
 import json
 import api_keys
@@ -6,51 +5,35 @@ import csv
 import time
 import zipfile
 import os
+from util import flatten_json
+
+KEY_LIST = ['id', 'id', 'id_str', 'name', 'screen_name', 'location', 'description', "followers_count",
+            'friends_count', 'created_at']
 
 
-class Twitter_Scraper:
+class TwitterScraper:
     """
     Twitter_Scraper class contains the logic to scrape the given userId list and store it in the format of either
     json or csv.
     """
-    def __init__(self, inputfilepath, outputfilepath):
+    def __init__(self, input_file, output_file):
         """
         Method to initialized the class data members
-        :param inputfilepath: User input for path to the input file
-        :param outputfilepath: User input for path to the output file
+        :param input_file: User input for path to the input file
+        :param output_file: User input for path to the output folder
 
         key_list: data member that contains the list of columns names for the csv output file
         """
-        self.key_list = ['id', 'id', 'id_str', 'name', 'screen_name', 'location', 'description', "followers_count",
-                         'friends_count', 'created_at']
 
         auth = tweepy.OAuthHandler(api_keys.api_key, api_keys.api_secret_key)
         auth.set_access_token(api_keys.access_token, api_keys.access_token_secret)
 
         # wait_on_rate_limit will put the running code on sleep and will resume it after rate limit time
         self.api = tweepy.API(auth_handler=auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
-        self.inputfilepath = inputfilepath
-        self.outputfilepath = outputfilepath
+        self.inputfilepath = input_file
+        self.outputfilepath = output_file
 
-    def flatten_json(y):
-        """
-        Method to convert the multilayer JSON to 1 dimention row vector
-        :return: flattern json dictionary
-        """
-        out = {}
-
-        def flatten(x, name=''):
-            if type(x) is dict:
-                for a in x:
-                    flatten(x[a], name + a + '_')
-            else:
-                out[name[:-1]] = x
-
-        # Recursively call itself with the child dictionary
-        flatten(y)
-        return out
-
-    def genFile(self, format, clean_userid=0):
+    def generate_file(self, format=json, clean_userid=0):
         """
         Method to send the api calls to twitter and get the user data in the json format. The method stores all the
         data in the user specified format(json or csv) in the zip file format to reduce the storage space and also
@@ -62,6 +45,7 @@ class Twitter_Scraper:
 
         timestr = time.strftime("%Y_%m_%d")
         inputfile = open(self.inputfilepath, 'r')
+
         if format == 'csv':
             outputfile = csv.writer(open(self.outputfilepath + timestr + '_profiles_2017_250k' + '.csv', "w+"))
         else:
@@ -108,8 +92,8 @@ class Twitter_Scraper:
                 else:
                     for status in statuses:
                         # Function will return the 1 dimensional row vector for the given status
-                        status = self.flatten_json(status)
-                        status_list = [status[key] for key in self.key_list]
+                        status = flatten_json(status)
+                        status_list = [status[key] for key in KEY_LIST]
 
                         # If we are writing the first line of the output file then following code will
                         # write the headers of each column in the output file

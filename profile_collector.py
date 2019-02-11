@@ -1,12 +1,12 @@
-from config import parse_args
-import twitter_scraper
+from util import parse_args
+from twitter_scraper import Twitter_Scraper
 
 
 def main():
 
     args = parse_args()
-    twitter_scraper_object = twitter_scraper.Twitter_Scraper(args.inputfile, args.outputfile)
-    twitter_scraper_object.genFile(args.format, args.clean_userid)
+    twitter_scraper_object = Twitter_Scraper(args.inputfile, args.outputfile)
+    twitter_scraper_object.generate_file(args.format, args.clean_userid)
 
 
 if __name__ == "__main__":

@@ -10,7 +10,7 @@ def is_valid_file(parser, arg):
         return arg  # return file path
 
 
-def parse_args():
+def parse_args1():
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", dest="inputfile", required=True,
@@ -66,4 +66,28 @@ def parse_args4():
     args = parser.parse_args()
 
     return args
+
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-i1", dest="inputfile1", required=True,
+                        help="Path to input file 1", type=lambda x: is_valid_file(parser, x))
+    parser.add_argument("-i2", dest="inputfile2", required=False,
+                        help="Path to input file 2", type=lambda x: is_valid_file(parser, x))
+    parser.add_argument("-o", dest="outputfile", required=False,
+                        help="Path to output file")
+    parser.add_argument("-f", dest="format", required=False, choices=["json", "csv"],
+                        help="Specify the format of the output file", default="json", type=str)
+    parser.add_argument("-u", dest="clean_userid", required=False,
+                        help="Specify 1 if want to store a cleaned list of user ids", default=0, type=int)
+    parser.add_argument("-n", dest="n", required=False,
+                        help="Specify the ngram", default=1, type=int)
+    parser.add_argument("-c", dest="cutoff_freq", required=False,
+                        help="The ngrams that has less frequency than the cut off frequency will not be included in "
+                             "the output file", default=5, type=int)
+
+    args = parser.parse_args()
+
+    return args
+
 
