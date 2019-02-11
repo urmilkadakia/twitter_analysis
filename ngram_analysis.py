@@ -49,13 +49,30 @@ def count_ngrams_frequency(inputfile, n):
     return ngram_freq
 
 
-def changing_ngram(inputfile1, inputfile2,  outputfilepath, n=1):
+def ngram_frequency_dist(inputfile, outputfile, n=1):
     """
-    The function will count the difference between the frequencies of the two given files for the specified ngram and
+    The function counts the frequency of each ngram specified by the input parameter n and store the output as the csv
+    at the output file location.
+    :param inputfile: Path to the input file
+    :param outputfile: Path to the output file
+    :param n: n represents the n in n-gram which is a contiguous sequence of n items
+    """
+    ngram_freq = count_ngrams_frequency(inputfile, n)
+    ngram_freq = ngram_freq.most_common()
+
+    with open(outputfile, "w+") as csvfile:
+        writer = csv.writer(csvfile)
+        for item in ngram_freq:
+            writer.writerow(item)
+
+
+def changing_ngram(inputfile1, inputfile2,  outputfile, n=1):
+    """
+    The function counts the difference between the frequencies of the two given files for the specified ngram and
     store it in the output file path folder.
     :param inputfile1: Path to the input file 1
     :param inputfile2: Path to the input file 2
-    :param outputfilepath: Path to the output folder
+    :param outputfile: Path to the output file
     :param n: n represents the n in n-gram which is a contiguous sequence of n items
     """
 
@@ -78,47 +95,18 @@ def changing_ngram(inputfile1, inputfile2,  outputfilepath, n=1):
 
     ngram_freq = sorted(ngram_freq.items(), key=lambda kv: kv[1], reverse=True)
 
-    if n == 1:
-        ngram_type = 'uni'
-    elif n == 2:
-        ngram_type = 'bi'
-    elif n == 3:
-        ngram_type = 'tri'
-    else:
-        ngram_type = str(n)
-    with open(outputfilepath + ngram_type + "gram_change_freq.csv", "w+") as csvfile:
+    with open(outputfile, "w+") as csvfile:
         writer = csv.writer(csvfile)
         for item in ngram_freq:
             writer.writerow(item)
 
 
-def ngram_frequency_dist(inputfile, outputfilepath, n=1):
+def date_sort(file):
     """
-
-    :param inputfile:
-    :param outputfilepath:
-    :param n:
-    :return:
+    The function extracts the date from the filename and return it
+    :param file: the name of the file in the string format
+    :return: the extracted date from the filename as an integer of form yyyymmdd
     """
-    ngram_freq = count_ngrams_frequency(inputfile, n)
-    ngram_freq = ngram_freq.most_common()
-
-    if n == 1:
-        ngram_type = 'uni'
-    elif n == 2:
-        ngram_type = 'bi'
-    elif n == 3:
-        ngram_type = 'tri'
-    else:
-        ngram_type = str(n)
-    with open(outputfilepath + ngram_type + "gram.csv", "w+") as csvfile:
-        writer = csv.writer(csvfile)
-        # writer.writerow(fieldnames)
-        for item in ngram_freq:
-            writer.writerow(item)
-
-
-def dateSort(file):
     date = re.findall(r'[0-9]{2}_[0-9]{2}_[0-9]{4}', file)[0]
     date = int(''.join(date.split('_')))
     return date
@@ -132,7 +120,7 @@ def daily_unigram_collector(inputfilepath, outputfile, freq):
     :param outputfile: Path to the output file
     :param freq: The ngrams that has less frequency than the cut off frequency will not be included in the output file
     """
-    for file in sorted(glob.glob(os.path.join(inputfilepath, '*2019.zip')), key=dateSort):
+    for file in sorted(glob.glob(os.path.join(inputfilepath, '*2019.zip')), key=date_sort):
         ngram_freq = count_ngrams_frequency(file, n=1)
         ngram_freq = ngram_freq.most_common()
 
@@ -163,16 +151,17 @@ def daily_unigram_collector(inputfilepath, outputfile, freq):
         unigram_combined.to_csv(outputfile)
 
 
-def char_length_histogram(inputfile, outputfilepath):
+def char_length_histogram(inputfile, outputfile):
+    """
+    The function to plot and store the histogram of the character length description of each user in the file
+    :param inputfile: Path to the input file
+    :param outputfile: Path to the output file
     """
 
-    :param inputfile:
-    :param outputfilepath:
-    :return:
-    """
-
-    with open(inputfile, "r") as f:
-        json_list = json.load(f)
+    with zipfile.ZipFile(inputfile, 'r') as z:
+        for filename in z.namelist():
+            with z.open(filename) as f:
+                json_list = json.load(f)
 
     text_len = []
     for user in json_list:
@@ -180,77 +169,115 @@ def char_length_histogram(inputfile, outputfilepath):
 
     # An "interface" to matplotlib.axes.Axes.hist() method
     n, bins, patches = plt.hist(x=text_len, bins=25, rwidth=0.9)
-    plt.xlabel('character length')
+    plt.xlabel('Character length')
     plt.ylabel('Frequency')
-    plt.title('Description character length distribution')
-    plt.savefig(outputfilepath + "histogram.png")
+    plt.title('Character length distribution of user descriptions')
+    plt.savefig(outputfile)
 
 
-def ngram_histogram(inputfile, outputfilepath, n=1):
+def ngram_histogram(inputfile, outputfile, cutoff_freq, n=1):
     """
-
+    The function to plot and store the histogram of the specified ngram and their frequencies for the ngrams which has
+    frequency greater than cutoff_freq
     :param inputfile:
-    :param outputfilepath:
+    :param outputfile:
+    :param cutoff_freq:
     :param n:
     :return:
     """
-
-    ngram_frequency_dist(inputfile, outputfilepath, n=1)
-    data = pd.read_csv(outputfilepath + "uni" + "gram.csv")
-
+    ngram_freq = count_ngrams_frequency(inputfile, n)
+    ngram_freq = ngram_freq.most_common()
     plt.figure(num=None, figsize=(16, 10), dpi=300, facecolor='w', edgecolor='k')
 
     # Checking the ngram is unigram or not
-    if n == 1:
-        xdata = []
-        for item in data.ix[:, 0]:
-            xdata.append(item[2:-3])
-    else:
-        xdata = data.ix[:, 0]
-    ydata = data.ix[:, -1]
+    xdata = []
+    ydata = []
 
-    # Plotting the top 50 ngrams of the given file
-    plt.bar(xdata[:200], ydata[:200])
-    plt.xlabel('character length')
-    plt.xticks(xdata[:200], xdata[:200], rotation='vertical')
+    for x, y in ngram_freq:
+        if y < cutoff_freq:
+            break
+        if n == 1:
+            xdata.append(x[0])
+        else:
+            xdata.append(x)
+        ydata.append(y)
+
+
+    # Plotting the ngrams of the given file
+    plt.bar(xdata, ydata)
+    plt.xlabel('Ngrams')
+    plt.xticks(xdata, xdata, rotation='vertical')
     plt.ylabel('Frequency')
-    plt.title('Description character length distribution')
-    plt.savefig(outputfilepath + "ngram_frequency.png")
+    plt.title('Ngram frequency distribution ')
+    plt.savefig(outputfile)
+
+def generate_state_dictionary(inputfile):
+    df = pd.read_csv(inputfile)
+    state_locations = {}
+
+    for index, row in df.iterrows():
+        state_name = re.sub(r"[^a-zA-Z]+", ' ', row[3]).lower()
+        if state_name not in state_locations:
+            state_locations[state_name] = set()
+            state_locations[state_name].add(state_name)
+
+            # Adding state ID to the dictionary
+            state_locations[state_name].add(re.sub(r"[^a-zA-Z]+", ' ', row[2]).lower())
+
+        # Adding city name to the dictionary
+        if row[0]:
+            state_locations[state_name].add(re.sub(r"[^a-zA-Z]+", ' ', row[0]).lower())
+
+        # Adding county name to the dictionary
+        if row[5]:
+            state_locations[state_name].add(re.sub(r"[^a-zA-Z]+", ' ', row[5]).lower())
+
+    return state_locations
 
 
 def get_locations(inputfile, outputfile):
-    with open(inputfile, "r") as f:
-        json_list = json.load(f)
-    df = pd.read_csv('/home/urmilkadakia/Desktop/Masters/Social_behavioral/twitter_analysis/OUTPUT/uscitiesv1.4.csv')
-    us_locations = set()
+    with zipfile.ZipFile(inputfile, 'r') as z:
+        for filename in z.namelist():
+            with z.open(filename) as f:
+                json_list = json.load(f)
 
-    for index, row in df.iterrows():
-        if row[0]:
-            us_locations.add(re.sub(r"[^a-zA-Z]+", ' ', row[0]).lower())
-        if row[2]:
-            us_locations.add(re.sub(r"[^a-zA-Z]+", ' ', row[2]).lower())
-        if row[3]:
-            us_locations.add(re.sub(r"[^a-zA-Z]+", ' ', row[3]).lower())
-        if row[5]:
-            us_locations.add(re.sub(r"[^a-zA-Z]+", ' ', row[5]).lower())
-    us_locations.add('us')
-    us_locations.add('usa')
+    state_locations = \
+        generate_state_dictionary('/home/urmilkadakia/Desktop/Masters/Social_behavioral/twitter_analysis/OUTPUT/uscitiesv1.4.csv')
     location_dict = {}
     for item in json_list:
         location_dict[item['id']] = re.split(r'[`\-=~!@#$%^&*()_+\[\]{};\'\\:"|<,./<>?]', item['location'].lower())
-    flag = 0
+    state_flag = 0
+    us_flag = 0
+    cnt = 0
     for id in location_dict:
         for item in location_dict[id]:
-            if item.strip() in us_locations:
-                location_dict[id] = 'USA'
-                flag = 1
+            for state in state_locations:
+                if item.strip() in state_locations[state]:
+                    location_dict[id] = state
+                    state_flag = 1
+                    break
+            if state_flag == 1:
                 break
-        if flag == 0:
-            location_dict[id] = 'Not in USA'
+        if state_flag == 1:
+            state_flag = 0
         else:
-            flag = 0
-    print(location_dict)
-    location_dict.to_csv(outputfile)
+            for item in location_dict[id]:
+                if item.strip() == 'us' or item.strip() == 'usa' or item.strip() == 'united states':
+                    location_dict[id] = 'usa'
+                    us_flag = 1
+                    break
+            if us_flag == 1:
+                us_flag = 0
+            else:
+                location_dict[id] = 'not in usa'
+                cnt += 1
+    header_flag = 0
+    with open(outputfile, 'w') as csvfile:
+        writer = csv.writer(csvfile)
+        if header_flag == 0:
+            writer.writerow(['Id', 'Location'])
+        for data in location_dict:
+            writer.writerow([data, location_dict[data]])
 
 
 def main():
@@ -259,9 +286,10 @@ def main():
     # changing_ngram(args.inputfile, args.inputfile, args.outputfile, args.n)
     # ngram_frequency_dist(args.inputfile, args.outputfile, args.n)
 
-    daily_unigram_collector(args.inputfile, args.outputfile, args.n)
-    # get_locations(args.inputfile, args.outputfile)
-    # gen_histogram1(args.inputfile, args.outputfile, n=1)
+    # daily_unigram_collector(args.inputfile, args.outputfile, args.n)
+    get_locations(args.inputfile, args.outputfile)
+    # ngram_histogram(args.inputfile, args.outputfile, 10, 1)
+    # char_length_histogram(args.inputfile, args.outputfile)
 
 
 if __name__ == "__main__":
