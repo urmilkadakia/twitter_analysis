@@ -49,7 +49,7 @@ def bot_or_not(input_file_path, output_file_path):
 def main():
 
     args = parse_args()
-    bot_or_not(args.inputfile, args.outputfile)
+    bot_or_not(args.input_file1, args.output_file)
 
 
 if __name__ == "__main__":
