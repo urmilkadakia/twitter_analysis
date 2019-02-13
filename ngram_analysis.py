@@ -163,9 +163,9 @@ def char_length_histogram(input_file, output_file):
 
     # An "interface" to matplotlib.axes.Axes.hist() method
     n, bins, patches = plt.hist(x=text_len, bins=25, rwidth=0.9)
-    plt.xlabel('Character length')
-    plt.ylabel('Frequency')
-    plt.title('Character length distribution of user descriptions')
+    plt.xlabel('Character length', fontsize=12)
+    plt.ylabel('Frequency',  fontsize=12)
+    plt.title('Character length distribution of user descriptions',  fontsize=14)
     plt.savefig(output_file)
 
 
@@ -199,10 +199,10 @@ def ngram_histogram(input_file, output_file, n=1, cutoff_freq=5):
 
     # Plotting the ngrams of the given file
     plt.bar(xdata, ydata)
-    plt.xlabel('Ngrams')
+    plt.xlabel('Ngrams', fontsize=12)
     plt.xticks(xdata, xdata, rotation='vertical')
-    plt.ylabel('Frequency')
-    plt.title('Ngram frequency distribution ')
+    plt.ylabel('Frequency', fontsize=12)
+    plt.title('Ngram frequency distribution ', fontsize=14)
     plt.savefig(output_file)
 
 
@@ -247,6 +247,7 @@ def get_locations(input_file1, input_file2, output_file):
             if us_flag == 1:
                 us_flag = 0
             else:
+                print(location_dict[user_id])
                 location_dict[user_id] = 'not in usa'
                 cnt += 1
     header_flag = 0

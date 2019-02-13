@@ -99,7 +99,7 @@ class TwitterScraper:
                         # If we are writing the first line of the output file then following code will
                         # write the headers of each column in the output file
                         if header_flag == 0:
-                            header = self.key_list
+                            header = KEY_LIST
                             output_file.writerow(header)
                             header_flag = 1
                         output_file.writerow(status_list)
@@ -120,13 +120,13 @@ class TwitterScraper:
             zipf = zipfile.ZipFile(time_str + '_profiles_2017_250k' + '.txt.zip', 'w', zipfile.ZIP_DEFLATED)
             zipf.write(time_str + '_profiles_2017_250k' + '.txt')
             zipf.close()
-            os.remove(time_str + '_profiles_2017_250k' + '.txt')
+            # os.remove(time_str + '_profiles_2017_250k' + '.txt')
         else:
             os.chdir(self.output_file_path)
             zipf = zipfile.ZipFile(time_str + '_profiles_2017_250k' + '.csv.zip', 'w', zipfile.ZIP_DEFLATED)
             zipf.write(time_str + '_profiles_2017_250k' + '.csv')
             zipf.close()
-            os.remove(time_str + '_profiles_2017_250k' + '.csv')
+            # os.remove(time_str + '_profiles_2017_250k' + '.csv')
 
         print("failed_IDs:", user_id_failed)
         print("Number of failed ID:", len(user_id_failed))
