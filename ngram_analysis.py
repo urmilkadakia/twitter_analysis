@@ -182,7 +182,7 @@ def ngram_histogram(input_file, output_file, n=1, cutoff_freq=5):
     """
     ngram_freq = count_ngrams_frequency(input_file, n)
     ngram_freq = ngram_freq.most_common()
-    plt.figure(num=None, figsize=(16, 10), dpi=300, facecolor='w', edgecolor='k')
+    # plt.figure(num=None, figsize=(16, 10), dpi=300, facecolor='w', edgecolor='k')
 
     xdata = []
     ydata = []
@@ -200,9 +200,10 @@ def ngram_histogram(input_file, output_file, n=1, cutoff_freq=5):
     # Plotting the ngrams of the given file
     plt.bar(xdata, ydata)
     plt.xlabel('Ngrams', fontsize=12)
-    plt.xticks(xdata, xdata, rotation='vertical')
+    plt.xticks(xdata, xdata, rotation=45)
     plt.ylabel('Frequency', fontsize=12)
     plt.title('Ngram frequency distribution ', fontsize=14)
+    plt.gcf().subplots_adjust(bottom=0.15)
     plt.savefig(output_file)
 
 
