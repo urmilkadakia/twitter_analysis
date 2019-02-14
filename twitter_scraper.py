@@ -46,11 +46,12 @@ class TwitterScraper:
 
         time_str = time.strftime("%Y_%m_%d")
         input_file = open(self.input_file_path, 'r')
+        length_of_file = len(input_file.readlines())
 
         if format == 'csv':
-            output_file = csv.writer(open(self.output_file_path + time_str + '_profiles_2017_250k' + '.csv', "w+"))
+            output_file = csv.writer(open(self.output_file_path + time_str + '_profiles_' + str(length_of_file) + '.csv', "w+"))
         else:
-            output_file = open(self.output_file_path + time_str + '_profiles_2017_250k' + '.txt', "w+")
+            output_file = open(self.output_file_path + time_str + '_profiles_' + str(length_of_file) + '.txt', "w+")
         clean_userid_file = ''
         if clean_userid:
             clean_userid_file = csv.writer(open(self.output_file_path + 'new_userid_list_' + time_str + '.csv', "w+"))
@@ -64,8 +65,6 @@ class TwitterScraper:
         user_id_success = []
         json_list = []
         header_flag = 0
-
-        length_of_file = len(input_file.readlines())
 
         inputfile = open(self.input_file_path, 'r')
         for line in inputfile:
@@ -117,16 +116,16 @@ class TwitterScraper:
             json_status = json.dumps(json_list)
             output_file.write(json_status)
             os.chdir(self.output_file_path)
-            zipf = zipfile.ZipFile(time_str + '_profiles_2017_250k' + '.txt.zip', 'w', zipfile.ZIP_DEFLATED)
-            zipf.write(time_str + '_profiles_2017_250k' + '.txt')
+            zipf = zipfile.ZipFile(time_str + '_profiles_' + str(length_of_file) + '.zip', 'w', zipfile.ZIP_DEFLATED)
+            zipf.write(time_str + '_profiles_' + str(length_of_file) + '.txt')
             zipf.close()
-            # os.remove(time_str + '_profiles_2017_250k' + '.txt')
+            # os.remove(time_str + '_profiles_' + str(length_of_file) + '.txt')
         else:
             os.chdir(self.output_file_path)
-            zipf = zipfile.ZipFile(time_str + '_profiles_2017_250k' + '.csv.zip', 'w', zipfile.ZIP_DEFLATED)
-            zipf.write(time_str + '_profiles_2017_250k' + '.csv')
+            zipf = zipfile.ZipFile(time_str + '_profiles_' + str(length_of_file) + '.zip', 'w', zipfile.ZIP_DEFLATED)
+            zipf.write(time_str + '_profiles_' + str(length_of_file) + '.csv')
             zipf.close()
-            # os.remove(time_str + '_profiles_2017_250k' + '.csv')
+            # os.remove(time_str + '_profiles_' + str(length_of_file) + '.csv')
 
         print("failed_IDs:", user_id_failed)
         print("Number of failed ID:", len(user_id_failed))

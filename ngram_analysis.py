@@ -248,7 +248,7 @@ def get_locations(input_file1, input_file2, output_file):
             if us_flag == 1:
                 us_flag = 0
             else:
-                print(location_dict[user_id])
+                # print(location_dict[user_id])
                 location_dict[user_id] = 'not in usa'
                 cnt += 1
     header_flag = 0
