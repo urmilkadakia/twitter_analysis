@@ -112,14 +112,14 @@ def daily_ngram_collector(input_file_path, output_file, n=1, cutoff_freq=5):
     :param cutoff_freq: The ngrams that has less frequency than the cut off frequency will not be included in the
                         output file. The default value is 5.
     """
-    for file in sorted(glob.glob(os.path.join(input_file_path, '*2019.zip')), key=date_sort):
+    for file in sorted(glob.glob(os.path.join(input_file_path, '*10000.zip')), key=date_sort):
         ngram_freq = count_ngrams_frequency(file, n=n)
         ngram_freq = ngram_freq.most_common()
 
         # Creating the new row to add to the daily collector file
         new_row1 = {}
         # Extracting the Date from the filename
-        new_row1['Date'] = re.findall(r'[0-9]{2}_[0-9]{2}_[0-9]{4}', file)[0]
+        new_row1['Date'] = re.findall(r'[0-9]{4}_[0-9]{2}_[0-9]{2}', file)[0]
         for item, val in ngram_freq:
             if n == 1:
                 new_row1[item[0]] = [val]
