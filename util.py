@@ -27,7 +27,7 @@ def parse_args():
                         help="Path to input file 1", type=lambda x: is_valid_file(parser, x))
     parser.add_argument("-i2", dest="input_file2", required=False,
                         help="Path to input file 2", type=lambda x: is_valid_file(parser, x))
-    parser.add_argument("-o1", dest="output_file", required=False,
+    parser.add_argument("-o", dest="output_file", required=False,
                         help="Path to output file")
     parser.add_argument("-f", dest="format", required=False, choices=["json", "csv"],
                         help="Specify the format of the output file", default="json", type=str)
@@ -69,7 +69,7 @@ def date_sort(file):
     :param file: the name of the file in the string format
     :return: the extracted date from the filename as an integer of form yyyymmdd
     """
-    date = re.findall(r'[0-9]{2}_[0-9]{2}_[0-9]{4}', file)[0]
+    date = re.findall(r'[0-9]{4}_[0-9]{2}_[0-9]{2}', file)[0]
     date = int(''.join(date.split('_')))
     return date
 

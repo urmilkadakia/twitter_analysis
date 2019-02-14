@@ -36,7 +36,7 @@ def bot_or_not(input_file_path, output_file_path):
         # Call the lookup function for a list 100 user IDs
         if count % 100 == 0 or count == length_of_file:
             for screen_name, result in bom.check_accounts_in(accounts):
-                print(screen_name,result)
+                # print(screen_name,result)
                 if 'error' in result.keys():
                     output_file.writerow([str(screen_name), 'error'])
                     failed_count += 1
