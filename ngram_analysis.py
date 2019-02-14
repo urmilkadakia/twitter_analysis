@@ -3,6 +3,7 @@ import csv
 import nltk
 from nltk.util import ngrams
 from nltk.tokenize import TweetTokenizer
+from nltk.corpus import stopwords
 import collections
 import re
 import string
@@ -15,6 +16,7 @@ import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
 nltk.download('punkt')
+nltk.download('stopwords')
 from util import date_sort, generate_state_dictionary
 
 
@@ -182,7 +184,7 @@ def ngram_histogram(input_file, output_file, n=1, cutoff_freq=5):
     """
     ngram_freq = count_ngrams_frequency(input_file, n)
     ngram_freq = ngram_freq.most_common()
-    # plt.figure(num=None, figsize=(16, 10), dpi=300, facecolor='w', edgecolor='k')
+    # stop_words = set(stopwords.words('english'))
 
     xdata = []
     ydata = []
@@ -190,6 +192,8 @@ def ngram_histogram(input_file, output_file, n=1, cutoff_freq=5):
     for x, y in ngram_freq:
         if y < cutoff_freq:
             break
+
+        # if not any(elem in x for elem in stop_words):
         # Checking the ngram is unigram or not
         if n == 1:
             xdata.append(x[0])
@@ -200,10 +204,10 @@ def ngram_histogram(input_file, output_file, n=1, cutoff_freq=5):
     # Plotting the ngrams of the given file
     plt.bar(xdata, ydata)
     plt.xlabel('Ngrams', fontsize=12)
-    plt.xticks(xdata, xdata, rotation=45)
+    plt.xticks(xdata, xdata, rotation=80)
     plt.ylabel('Frequency', fontsize=12)
     plt.title('Ngram frequency distribution ', fontsize=14)
-    plt.gcf().subplots_adjust(bottom=0.15)
+    plt.gcf().subplots_adjust(bottom=0.45)
     plt.savefig(output_file)
 
 
