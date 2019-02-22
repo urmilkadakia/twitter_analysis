@@ -90,7 +90,7 @@ def generate_state_dictionary(inputfile):
         state_name = re.sub(r"[^a-zA-Z]+", ' ', row[3]).lower()
         if state_name not in state_locations:
             state_locations[state_name] = set()
-            state_locations[state_name].add(state_name)
+            # state_locations[state_name].add(state_name)
 
             # Adding state ID to the dictionary
             state_locations[state_name].add(re.sub(r"[^a-zA-Z]+", ' ', row[2]).lower())
