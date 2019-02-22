@@ -235,12 +235,21 @@ def get_locations(input_file1, input_file2, output_file):
     for user_id in location_dict:
         for item in location_dict[user_id]:
             for state in state_locations:
-                if item.strip() in state_locations[state]:
+                if item == state:
                     location_dict[user_id] = state
                     state_flag = 1
                     break
             if state_flag == 1:
                 break
+        if state_flag == 0:
+            for item in location_dict[user_id]:
+                for state in state_locations:
+                    if item.strip() in state_locations[state]:
+                        location_dict[user_id] = state
+                        state_flag = 1
+                        break
+                if state_flag == 1:
+                    break
         if state_flag == 1:
             state_flag = 0
         else:
