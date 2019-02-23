@@ -4,7 +4,8 @@ import csv
 import zipfile
 import json
 import re
-from util import generate_state_dictionary
+import pandas as pd
+from util import generate_state_dictionary, get_user_profile_dict
 
 
 def bot_or_not(input_file_path, output_file_path):
@@ -112,4 +113,33 @@ def get_locations(input_file1, input_file2, output_file):
             writer.writerow([data, location_dict[data]])
 
 
-def
+def entities_count_difference(input_file1, input_file2, output_file):
+    """
+    The function calculates the difference between the followers count, following count, total tweets and total likes
+    of each user between the two input files that  are generate at two different time
+    :param input_file1: Path to user profiles file of a specific date (earlier date)
+    :param input_file2: Path to user profiles file of a specific date (later date)
+    :param output_file: Path to output file
+    """
+
+    user_profiles_1 = get_user_profile_dict(input_file1)
+    user_profiles_2 = get_user_profile_dict(input_file2)
+
+    entity_count_difference = pd.DataFrame(columns=['user_id', 'tweet_diff', 'follower_diff', 'following_diff',
+                                                    'like_diff'], index=None)
+
+    for user in user_profiles_1:
+        if user in user_profiles_2:
+            tweet_diff = user_profiles_2[user]['statuses_count'] - user_profiles_1[user]['statuses_count']
+            follower_diff = user_profiles_2[user]['followers_count'] - user_profiles_1[user]['followers_count']
+            following_diff = user_profiles_2[user]['friends_count'] - user_profiles_1[user]['friends_count']
+            like_diff = user_profiles_2[user]['favourites_count'] - user_profiles_1[user]['favourites_count']
+
+            entity_count_difference.loc[user] = [user, tweet_diff, follower_diff, following_diff, like_diff]
+
+    # Setting the user_id as the index
+    entity_count_difference.set_index(['user_id'], inplace=True)
+
+    entity_count_difference.to_csv(output_file)
+
+
