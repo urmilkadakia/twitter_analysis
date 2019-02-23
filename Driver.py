@@ -1,6 +1,6 @@
 from util import parse_args
-from ngram_analysis import daily_ngram_collector, changing_ngram, ngram_frequency_dist, get_locations, \
-    ngram_histogram, char_length_histogram
+from ngram_methods import daily_ngram_collector, changing_ngram, ngram_frequency_dist, get_locations, \
+    ngram_histogram, char_length_histogram, ngram_adjacency_matrix
 
 
 def main():
@@ -10,8 +10,9 @@ def main():
     # ngram_frequency_dist(args.input_file1, args.output_file, args.n)
     # daily_ngram_collector(args.input_file1, args.output_file, args.n, args.cutoff_freq)
     # get_locations(args.input_file1, args.input_file2, args.output_file)
-    ngram_histogram(args.input_file1, args.output_file, args.n, args.cutoff_freq)
+    # ngram_histogram(args.input_file1, args.output_file, args.n, args.cutoff_freq)
     # char_length_histogram(args.input_file1, args.output_file)
+    ngram_adjacency_matrix(args.input_file1, args.output_file, args.n, args.cutoff_freq)
 
 
 if __name__ == "__main__":

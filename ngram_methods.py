@@ -38,7 +38,7 @@ def count_ngrams_frequency(input_file, n):
         text += user['description'].lower() + " "
 
     # Get rid of punctuation (except periods!)
-    punctuation_no_period = "[" + re.sub("\.", "", string.punctuation) + "]"
+    punctuation_no_period = "[" + re.sub(r"\.", "", string.punctuation) + "]"
     text = re.sub(punctuation_no_period, "", text)
 
     # Splits the sentences into words
@@ -211,64 +211,64 @@ def ngram_histogram(input_file, output_file, n=1, cutoff_freq=5):
     plt.savefig(output_file)
 
 
-def get_locations(input_file1, input_file2, output_file):
+def ngram_adjacency_matrix(input_file, output_file, n, cut_off):
     """
-    The function writes the user id and his/her us state name in the output file based on the the value of location key in the user
-    information and state_location dictionary. If function does not find the location in the state_locations dictionary
-    then not in usa will be written against the user id.
-    :param input_file1: Path to input file
-    :param input_file2: Path to the usa location file
+    The function writes the adjacency matrix to the output file, where the rows and columns are ngram and each cell is
+    the number of users that has both the ngram in their description.
+    :param input_file: Path to input file
     :param output_file: Path to output file
+    :param n: n represents the n in n-gram which is a contiguous sequence of n items. The default vale is 1 which
+              represents unigrams.
+    :param cut_off: The ngrams that has less frequency than the cut off frequency will not be included in the
+                    output file. The default value is 5.
     """
-    with zipfile.ZipFile(input_file1, 'r') as z:
+    ngram_freq = count_ngrams_frequency(input_file, n)
+    # ngram_freq = ngram_freq.most_common()
+    #
+    for ngram in list(ngram_freq):
+        if ngram_freq[ngram] < cut_off:
+            del ngram_freq[ngram]
+    # print(ngram_freq)
+
+    matrix = pd.DataFrame(np.zeros((len(ngram_freq), len(ngram_freq))), columns=ngram_freq, index=ngram_freq)
+
+    with zipfile.ZipFile(input_file, 'r') as z:
         for filename in z.namelist():
             with z.open(filename) as f:
                 json_list = json.load(f)
 
-    state_locations = generate_state_dictionary(input_file2)
-    location_dict = {}
-    for item in json_list:
-        location_dict[item['id']] = re.split(r'[`\-=~!@#$%^&*()_+\[\]{};\'\\:"|<,./<>?]', item['location'].lower())
-    state_flag = 0
-    us_flag = 0
-    cnt = 0
-    for user_id in location_dict:
-        for item in location_dict[user_id]:
-            for state in state_locations:
-                if item == state:
-                    location_dict[user_id] = state
-                    state_flag = 1
-                    break
-            if state_flag == 1:
-                break
-        if state_flag == 0:
-            for item in location_dict[user_id]:
-                for state in state_locations:
-                    if item.strip() in state_locations[state]:
-                        location_dict[user_id] = state
-                        state_flag = 1
-                        break
-                if state_flag == 1:
-                    break
-        if state_flag == 1:
-            state_flag = 0
-        else:
-            for item in location_dict[user_id]:
-                if item.strip() == 'us' or item.strip() == 'usa' or item.strip() == 'united states':
-                    location_dict[user_id] = 'usa'
-                    us_flag = 1
-                    break
-            if us_flag == 1:
-                us_flag = 0
-            else:
-                # print(location_dict[user_id])
-                location_dict[user_id] = 'not in usa'
-                cnt += 1
-    header_flag = 0
-    with open(output_file, 'w') as csvfile:
-        writer = csv.writer(csvfile)
-        if header_flag == 0:
-            writer.writerow(['Id', 'Location'])
-        for data in location_dict:
-            writer.writerow([data, location_dict[data]])
+    for user in json_list:
+        text = user['description'].lower()
 
+        # Get rid of punctuation (except periods!)
+        punctuation_no_period = "[" + re.sub(r"\.", "", string.punctuation) + "]"
+        text = re.sub(punctuation_no_period, "", text)
+
+        # Splits the sentences into words
+        tknzr = TweetTokenizer(strip_handles=True, reduce_len=True)
+        tokens = tknzr.tokenize(text)
+
+        ngrams_list = list(ngrams(tokens, n))
+        for i in ngrams_list:
+            for j in ngrams_list:
+                try:
+                    matrix[i][j] += 1
+                except KeyError:
+                    continue
+    drop_row = []
+    for i, row in matrix.iterrows():
+        if any(j > cut_off for j in row):
+            continue
+        else:
+            drop_row.append(i)
+    matrix.drop(drop_row, inplace=True)
+
+    drop_col = []
+    for col in matrix:
+        if any(j > cut_off for j in matrix[col]):
+            continue
+        else:
+            drop_col.append(col)
+    matrix.drop(columns=drop_col, inplace=True)
+
+    matrix.to_csv(output_file)
