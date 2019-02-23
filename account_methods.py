@@ -1,0 +1,115 @@
+import botometer
+import api_keys
+import csv
+import zipfile
+import json
+import re
+from util import generate_state_dictionary
+
+
+def bot_or_not(input_file_path, output_file_path):
+    """
+    The function decides whether each user id is a bot machine or human being and stores the user id and botometer
+    scores in the input
+    :param input_file_path: Path to input file
+    :param output_file_path: Path to output file
+    """
+    input_file = open(input_file_path)
+    output_file = csv.writer(open(output_file_path, "w+"))
+
+    mashape_key = api_keys.mashape_key
+    twitter_app_auth = {
+        'consumer_key': api_keys.api_key,
+        'consumer_secret': api_keys.api_secret_key,
+        'access_token': api_keys.access_token,
+        'access_token_secret': api_keys.access_token_secret,
+    }
+    bom = botometer.Botometer(wait_on_ratelimit=True,
+                              mashape_key=mashape_key,
+                              **twitter_app_auth)
+
+    count = 1
+    failed_count = 0
+    accounts = []
+    length_of_file = sum(1 for _ in input_file)
+
+    input_file = open(input_file_path)
+    for line in input_file:
+        accounts.append(int(float(line.strip())))
+        # Call the lookup function for a list 100 user IDs
+        if count % 100 == 0 or count == length_of_file:
+            for screen_name, result in bom.check_accounts_in(accounts):
+                # print(screen_name,result)
+                if 'error' in result.keys():
+                    output_file.writerow([str(screen_name), 'error'])
+                    failed_count += 1
+                    continue
+                output_file.writerow([str(screen_name), str(result['cap']['universal'])])
+            accounts.clear()
+        count += 1
+    print("Number of failed IDs:", failed_count)
+
+
+def get_locations(input_file1, input_file2, output_file):
+    """
+    The function writes the user id and his/her us state name in the output file based on the the value of location key in the user
+    information and state_location dictionary. If function does not find the location in the state_locations dictionary
+    then not in usa will be written against the user id.
+    :param input_file1: Path to input file
+    :param input_file2: Path to the usa location file
+    :param output_file: Path to output file
+    """
+    with zipfile.ZipFile(input_file1, 'r') as z:
+        for filename in z.namelist():
+            with z.open(filename) as f:
+                json_list = json.load(f)
+
+    state_locations = generate_state_dictionary(input_file2)
+    location_dict = {}
+    for item in json_list:
+        location_dict[item['id']] = re.split(r'[`\-=~!@#$%^&*()_+\[\]{};\'\\:"|<,./<>?]', item['location'].lower())
+    state_flag = 0
+    us_flag = 0
+    cnt = 0
+    for user_id in location_dict:
+        for item in location_dict[user_id]:
+            for state in state_locations:
+                if item == state:
+                    location_dict[user_id] = state
+                    state_flag = 1
+                    break
+            if state_flag == 1:
+                break
+        if state_flag == 0:
+            for item in location_dict[user_id]:
+                for state in state_locations:
+                    if item.strip() in state_locations[state]:
+                        location_dict[user_id] = state
+                        state_flag = 1
+                        break
+                if state_flag == 1:
+                    break
+        if state_flag == 1:
+            state_flag = 0
+        else:
+            for item in location_dict[user_id]:
+                if item.strip() == 'us' or item.strip() == 'usa' or item.strip() == 'united states':
+                    location_dict[user_id] = 'usa'
+                    us_flag = 1
+                    break
+            if us_flag == 1:
+                us_flag = 0
+            else:
+                # print(location_dict[user_id])
+                location_dict[user_id] = 'not in usa'
+                cnt += 1
+    header_flag = 0
+    with open(output_file, 'w') as csvfile:
+        writer = csv.writer(csvfile)
+        if header_flag == 0:
+            writer.writerow(['Id', 'Location'])
+        for data in location_dict:
+            writer.writerow([data, location_dict[data]])
+
+
+def
