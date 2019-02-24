@@ -1,11 +1,13 @@
+import os
 import botometer
 import api_keys
 import csv
 import zipfile
 import json
 import re
+import glob
 import pandas as pd
-from util import generate_state_dictionary, get_user_profile_dict
+from util import generate_state_dictionary, get_user_profile_dict, date_sort
 
 
 def bot_or_not(input_file_path, output_file_path):
@@ -141,5 +143,61 @@ def entities_count_difference(input_file1, input_file2, output_file):
     entity_count_difference.set_index(['user_id'], inplace=True)
 
     entity_count_difference.to_csv(output_file)
+
+
+def description_change_frequency(input_file_path, output_file):
+    """
+    The function calculates and store the number of times the user has made changes in his/her description.
+    :param input_file_path: Path where all the daily user profiles are stored
+    :param output_file: Path to output file
+    """
+
+    base_flag = 1
+    base_continue_flag = 0
+    user_change_freq = {}
+    for file in sorted(glob.glob(os.path.join(input_file_path, '*100.zip')), key=date_sort):
+        with zipfile.ZipFile(file, 'r') as z:
+            for filename in z.namelist():
+                # print(filename)
+                with z.open(filename) as f:
+                    if base_flag:
+                        base_json_list = json.load(f)
+                        base_flag = 0
+                        base_continue_flag = 1
+                    else:
+                        compare_json_list = json.load(f)
+            if base_continue_flag == 1:
+                base_continue_flag = 0
+                continue
+
+        # Generating dictionaries to compare the user description between two time stamps
+        # Key is user id and value is the description of user
+        base_description = {}
+        for user in base_json_list:
+            base_description[user['id']] = user['description']
+
+        compare_description = {}
+        for user in compare_json_list:
+            compare_description[user['id']] = user['description']
+
+        for user_id in base_description:
+            if user_id in compare_description:
+                if user_id not in user_change_freq:
+                    user_change_freq[user_id] = 0
+                if base_description[user_id] != compare_description[user_id]:
+                    base_description[user_id] = compare_description[user_id]
+                    user_change_freq[user_id] += 1
+
+        with open(output_file, "w+") as csvfile:
+            writer = csv.writer(csvfile)
+            for key, value in user_change_freq.items():
+                writer.writerow([key, value])
+
+
+
+
+
+
+
 
 
