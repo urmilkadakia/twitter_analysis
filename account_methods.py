@@ -106,11 +106,10 @@ def get_locations(input_file1, input_file2, output_file):
                 # print(location_dict[user_id])
                 location_dict[user_id] = 'not in usa'
                 cnt += 1
-    header_flag = 0
+
     with open(output_file, 'w') as csvfile:
         writer = csv.writer(csvfile)
-        if header_flag == 0:
-            writer.writerow(['Id', 'Location'])
+        writer.writerow(['user_id', 'location'])
         for data in location_dict:
             writer.writerow([data, location_dict[data]])
 
@@ -155,7 +154,7 @@ def description_change_frequency(input_file_path, output_file):
     base_flag = 1
     base_continue_flag = 0
     user_change_freq = {}
-    for file in sorted(glob.glob(os.path.join(input_file_path, '*100.zip')), key=date_sort):
+    for file in sorted(glob.glob(os.path.join(input_file_path, '*.zip')), key=date_sort):
         with zipfile.ZipFile(file, 'r') as z:
             for filename in z.namelist():
                 # print(filename)
@@ -180,6 +179,8 @@ def description_change_frequency(input_file_path, output_file):
         for user in compare_json_list:
             compare_description[user['id']] = user['description']
 
+        # checking user has change its description or not if yes replace base case with new description for to capture
+        # future changes and increment the user change frequency by 1
         for user_id in base_description:
             if user_id in compare_description:
                 if user_id not in user_change_freq:
@@ -188,10 +189,12 @@ def description_change_frequency(input_file_path, output_file):
                     base_description[user_id] = compare_description[user_id]
                     user_change_freq[user_id] += 1
 
-        with open(output_file, "w+") as csvfile:
-            writer = csv.writer(csvfile)
-            for key, value in user_change_freq.items():
-                writer.writerow([key, value])
+    # Store the user change frequency dictionary as a csv file
+    with open(output_file, "w+") as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(['user_id', 'location'])
+        for key, value in user_change_freq.items():
+            writer.writerow([key, value])
 
 
 
