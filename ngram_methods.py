@@ -17,15 +17,44 @@ mpl.use('Agg')
 import matplotlib.pyplot as plt
 nltk.download('punkt')
 nltk.download('stopwords')
-from util import date_sort, generate_state_dictionary
+from util import date_sort, get_user_description_dict
 
 
-def count_ngrams_frequency(input_file, n):
+def get_ngram_list(text, n=1):
+    """
+    Returns the a list of ngram for the input text for the specified ngram type
+    :param text: input text
+    :param n: n represents the n in n-gram which is a contiguous sequence of n items. The default vale is 1 which
+              represents unigram.
+    :return: Return a list of ngrams
+    """
+
+    # Get rid of punctuation (except periods!)
+    punctuation_no_period = "[" + re.sub(r"\.", "", string.punctuation) + "]"
+    text = re.sub(punctuation_no_period, "", text.lower())
+
+    # Splits the sentences into words
+    tknzr = TweetTokenizer(strip_handles=True, reduce_len=True)
+    tokens = tknzr.tokenize(text)
+
+    # remove remaining tokens that are not alphabetic
+    # Problem !!! also removes emoji joiners and similar tokens
+    # tokens = [token for token in tokens if token.isalpha()]
+
+    # filter out stop words
+    # stop_words = set(stopwords.words('english'))
+    # words = [w for w in words if w not in stop_words]
+
+    ngram_list = list(ngrams(tokens, n))
+    return ngram_list
+
+
+def count_ngrams_frequency(input_file, n=1):
     """
     The function will count the frequencies for the given ngram
     :param input_file: Path to the input file
     :param n: n represents the n in n-gram which is a contiguous sequence of n items. The default vale is 1 which
-              represents unigrams.
+              represents unigram.
     :return: Returns the dictionary of ngram and frequency as the key value pairs sorted in the decreasing order.
     """
     with zipfile.ZipFile(input_file, 'r') as z:
@@ -35,17 +64,9 @@ def count_ngrams_frequency(input_file, n):
 
     text = ''
     for user in json_list:
-        text += user['description'].lower() + " "
+        text += user['description'] + " "
 
-    # Get rid of punctuation (except periods!)
-    punctuation_no_period = "[" + re.sub(r"\.", "", string.punctuation) + "]"
-    text = re.sub(punctuation_no_period, "", text)
-
-    # Splits the sentences into words
-    tknzr = TweetTokenizer(strip_handles=True, reduce_len=True)
-    tokens = tknzr.tokenize(text)
-
-    ngrams_list = ngrams(tokens, n)
+    ngrams_list = get_ngram_list(text, n)
     # Get the frequency of each ngram in our corpus
     ngram_freq = collections.Counter(ngrams_list)
     return ngram_freq
@@ -57,7 +78,8 @@ def ngram_frequency_dist(input_file, output_file, n=1):
     at the output file location.
     :param input_file: Path to the input file
     :param output_file: Path to the output file
-    :param n: n represents the n in n-gram which is a contiguous sequence of n items
+    :param n: n represents the n in n-gram which is a contiguous sequence of n items. The default vale is 1 which
+              represents unigrams.
     """
     ngram_freq = count_ngrams_frequency(input_file, n)
     ngram_freq = ngram_freq.most_common()
@@ -75,7 +97,8 @@ def changing_ngram(input_file1, input_file2,  output_file, n=1):
     :param input_file1: Path to the input file 1
     :param input_file2: Path to the input file 2
     :param output_file: Path to the output file
-    :param n: n represents the n in n-gram which is a contiguous sequence of n items.
+    :param n: n represents the n in n-gram which is a contiguous sequence of n items. The default vale is 1 which
+              represents unigram.
     """
 
     ngram_freq1 = count_ngrams_frequency(input_file1, n)
@@ -110,7 +133,7 @@ def daily_ngram_collector(input_file_path, output_file, n=1, cutoff_freq=5):
     :param input_file_path: Path to the folder in which input files are stored
     :param output_file: Path to the output file
     :param n: n represents the n in n-gram which is a contiguous sequence of n items. The default vale is 1 which
-              represents unigrams.
+              represents unigram.
     :param cutoff_freq: The ngrams that has less frequency than the cut off frequency will not be included in the
                         output file. The default value is 5.
     """
@@ -178,7 +201,7 @@ def ngram_histogram(input_file, output_file, n=1, cutoff_freq=5):
     :param input_file: Path to input file
     :param output_file: Path to output file
     :param n: n represents the n in n-gram which is a contiguous sequence of n items. The default vale is 1 which
-              represents unigrams.
+              represents unigram.
     :param cutoff_freq: The ngrams that has less frequency than the cut off frequency will not be included in the
                         output file.  The default value is 5.
     """
@@ -218,17 +241,15 @@ def ngram_adjacency_matrix(input_file, output_file, n, cut_off):
     :param input_file: Path to input file
     :param output_file: Path to output file
     :param n: n represents the n in n-gram which is a contiguous sequence of n items. The default vale is 1 which
-              represents unigrams.
+              represents unigram.
     :param cut_off: The ngrams that has less frequency than the cut off frequency will not be included in the
                     output file. The default value is 5.
     """
     ngram_freq = count_ngrams_frequency(input_file, n)
-    # ngram_freq = ngram_freq.most_common()
-    #
+
     for ngram in list(ngram_freq):
         if ngram_freq[ngram] < cut_off:
             del ngram_freq[ngram]
-    # print(ngram_freq)
 
     matrix = pd.DataFrame(np.zeros((len(ngram_freq), len(ngram_freq))), columns=ngram_freq, index=ngram_freq)
 
@@ -238,19 +259,11 @@ def ngram_adjacency_matrix(input_file, output_file, n, cut_off):
                 json_list = json.load(f)
 
     for user in json_list:
-        text = user['description'].lower()
+        text = user['description']
 
-        # Get rid of punctuation (except periods!)
-        punctuation_no_period = "[" + re.sub(r"\.", "", string.punctuation) + "]"
-        text = re.sub(punctuation_no_period, "", text)
-
-        # Splits the sentences into words
-        tknzr = TweetTokenizer(strip_handles=True, reduce_len=True)
-        tokens = tknzr.tokenize(text)
-
-        ngrams_list = list(ngrams(tokens, n))
-        for i in ngrams_list:
-            for j in ngrams_list:
+        ngram_list = get_ngram_list(text, n)
+        for i in ngram_list:
+            for j in ngram_list:
                 try:
                     matrix[i][j] += 1
                 except KeyError:
@@ -272,3 +285,71 @@ def ngram_adjacency_matrix(input_file, output_file, n, cut_off):
     matrix.drop(columns=drop_col, inplace=True)
 
     matrix.to_csv(output_file)
+
+
+def ngram_alloy_matrix(input_file1, input_file2, output_file, n):
+    """
+    Alloy matrix count the number of new ngram pairings. If a ngram A is present at time 1 and at time 2. If a ngram B
+    is not present at time 1 but present at time 2, then AB is an alloy and its count will incremented by 1 for each
+    occurrence.
+    :param input_file1: Path to input file
+    :param input_file2: Path to input file
+    :param output_file: Path to output file
+    :param n: n represents the n in n-gram which is a contiguous sequence of n items. The default vale is 1 which
+              represents unigram.
+    """
+
+    with zipfile.ZipFile(input_file1, 'r') as z:
+        for filename in z.namelist():
+            with z.open(filename) as f:
+                json_list = json.load(f)
+
+    text = ''
+    for user in json_list:
+        text += user['description'] + ' '
+
+    ngram_set1 = set(get_ngram_list(text, n))
+
+    with zipfile.ZipFile(input_file2, 'r') as z:
+        for filename in z.namelist():
+            with z.open(filename) as f:
+                json_list = json.load(f)
+
+    text = ''
+    for user in json_list:
+        text += user['description'] + ' '
+
+    ngram_set2 = set(get_ngram_list(text, n))
+    ngram_set_combine = ngram_set1.copy()
+    ngram_set_combine.update(ngram_set2)
+
+    print(ngram_set1)
+    print(ngram_set2)
+
+    alloy_matrix = pd.DataFrame(np.zeros((len(ngram_set_combine), len(ngram_set_combine))), columns=ngram_set_combine,
+                                index=ngram_set_combine)
+
+    print(alloy_matrix)
+    user_description1 = get_user_description_dict(input_file1)
+    user_description2 = get_user_description_dict(input_file2)
+
+    for user in user_description1:
+        if user in user_description2:
+            user_ngram_list1 = get_ngram_list(user_description1[user], n)
+            user_ngram_list2 = get_ngram_list(user_description2[user], n)
+            for ngram2 in user_ngram_list2:
+                if ngram2 not in user_ngram_list1:
+                    for ngram1 in user_ngram_list1:
+                        alloy_matrix[ngram1][ngram2] += 1
+
+    alloy_matrix.to_csv(output_file)
+
+
+
+
+
+
+
+
+
+

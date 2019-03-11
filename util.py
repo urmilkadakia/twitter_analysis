@@ -1,6 +1,8 @@
 import argparse
 import os
 import re
+import zipfile
+import json
 import pandas as pd
 
 
@@ -104,3 +106,43 @@ def generate_state_dictionary(inputfile):
             state_locations[state_name].add(re.sub(r"[^a-zA-Z]+", ' ', row[5]).lower())
 
     return state_locations
+
+
+def get_user_profile_dict(input_file):
+    """
+    The method read the json file and generates dictionary where each key is user id and corresponding value is his/her
+    profile data.
+    :param input_file: Path to input file
+    :return: Return a dictionary where user id is key and his/her twitter profile data is its value.
+    """
+    with zipfile.ZipFile(input_file, 'r') as z:
+        for filename in z.namelist():
+            with z.open(filename) as f:
+                json_list = json.load(f)
+
+    user_profiles = {}
+    for user in json_list:
+        user_profiles[user['id_str']] = user
+
+    return user_profiles
+
+
+def get_user_description_dict(input_file):
+    """
+    The method read the json file and generates dictionary where each key is user id and corresponding value is his/her
+    profile description.
+    :param input_file: path to input file
+    :return: Return a dictionary where user id is key and his/her description is its value.
+    """
+    with zipfile.ZipFile(input_file, 'r') as z:
+        for filename in z.namelist():
+            with z.open(filename) as f:
+                json_list = json.load(f)
+
+    user_descriptions = {}
+    for user in json_list:
+        user_descriptions[user['id_str']] = user['description']
+
+    return user_descriptions
+
+
