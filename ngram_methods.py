@@ -291,7 +291,7 @@ def ngram_alloy_matrix(input_file1, input_file2, output_file, n):
     """
     Alloy matrix count the number of new ngram pairings. If a ngram A is present at time 1 and at time 2. If a ngram B
     is not present at time 1 but present at time 2, then AB is an alloy and its count will incremented by 1 for each
-    occurrence.
+    new occurrence.
     :param input_file1: Path to input file
     :param input_file2: Path to input file
     :param output_file: Path to output file
@@ -323,13 +323,9 @@ def ngram_alloy_matrix(input_file1, input_file2, output_file, n):
     ngram_set_combine = ngram_set1.copy()
     ngram_set_combine.update(ngram_set2)
 
-    print(ngram_set1)
-    print(ngram_set2)
-
     alloy_matrix = pd.DataFrame(np.zeros((len(ngram_set_combine), len(ngram_set_combine))), columns=ngram_set_combine,
                                 index=ngram_set_combine)
 
-    print(alloy_matrix)
     user_description1 = get_user_description_dict(input_file1)
     user_description2 = get_user_description_dict(input_file2)
 
@@ -343,6 +339,61 @@ def ngram_alloy_matrix(input_file1, input_file2, output_file, n):
                         alloy_matrix[ngram1][ngram2] += 1
 
     alloy_matrix.to_csv(output_file)
+
+
+def ngram_transmutation_matrix(input_file1, input_file2, output_file, n):
+    """
+    Alloy matrix count the number of new ngram pairings. If a ngram A is present at time 1 but not at time 2.
+    If a ngram B is not present at time 1 but present at time 2, then AB is an alloy and its count will incremented by
+    1 for each new occurrence.
+    :param input_file1: Path to input file
+    :param input_file2: Path to input file
+    :param output_file: Path to output file
+    :param n: n represents the n in n-gram which is a contiguous sequence of n items. The default vale is 1 which
+              represents unigram.
+    """
+
+    with zipfile.ZipFile(input_file1, 'r') as z:
+        for filename in z.namelist():
+            with z.open(filename) as f:
+                json_list = json.load(f)
+
+    text = ''
+    for user in json_list:
+        text += user['description'] + ' '
+
+    ngram_set1 = set(get_ngram_list(text, n))
+
+    with zipfile.ZipFile(input_file2, 'r') as z:
+        for filename in z.namelist():
+            with z.open(filename) as f:
+                json_list = json.load(f)
+
+    text = ''
+    for user in json_list:
+        text += user['description'] + ' '
+
+    ngram_set2 = set(get_ngram_list(text, n))
+    ngram_set_combine = ngram_set1.copy()
+    ngram_set_combine.update(ngram_set2)
+
+    transmutation_matrix = pd.DataFrame(np.zeros((len(ngram_set_combine), len(ngram_set_combine))), columns=ngram_set_combine,
+                                index=ngram_set_combine)
+
+    user_description1 = get_user_description_dict(input_file1)
+    user_description2 = get_user_description_dict(input_file2)
+
+    for user in user_description1:
+        if user in user_description2:
+            user_ngram_list1 = get_ngram_list(user_description1[user], n)
+            user_ngram_list2 = get_ngram_list(user_description2[user], n)
+            ngram_difference = [ngram for ngram in user_ngram_list1 + user_ngram_list2
+                                if ngram not in user_ngram_list1 or ngram not in user_ngram_list2]
+            for i in range(len(ngram_difference)):
+                for j in range(i+1, len(ngram_difference)):
+                        transmutation_matrix[ngram_difference[i]][ngram_difference[j]] += 1
+
+    transmutation_matrix.to_csv(output_file)
 
 
 
