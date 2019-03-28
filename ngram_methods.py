@@ -338,6 +338,22 @@ def ngram_alloy_matrix(input_file1, input_file2, output_file, n):
                     for ngram1 in user_ngram_list1:
                         alloy_matrix[ngram1][ngram2] += 1
 
+    drop_row = []
+    for i, row in alloy_matrix.iterrows():
+        if any(j > 0 for j in row):
+            continue
+        else:
+            drop_row.append(i)
+    alloy_matrix.drop(drop_row, inplace=True)
+
+    drop_col = []
+    for col in alloy_matrix:
+        if any(j > 0 for j in alloy_matrix[col]):
+            continue
+        else:
+            drop_col.append(col)
+    alloy_matrix.drop(columns=drop_col, inplace=True)
+
     alloy_matrix.to_csv(output_file)
 
 
@@ -392,6 +408,22 @@ def ngram_transmutation_matrix(input_file1, input_file2, output_file, n):
             for i in range(len(ngram_difference)):
                 for j in range(i+1, len(ngram_difference)):
                         transmutation_matrix[ngram_difference[i]][ngram_difference[j]] += 1
+
+    drop_row = []
+    for i, row in transmutation_matrix.iterrows():
+        if any(j > 0 for j in row):
+            continue
+        else:
+            drop_row.append(i)
+    transmutation_matrix.drop(drop_row, inplace=True)
+
+    drop_col = []
+    for col in transmutation_matrix:
+        if any(j > 0 for j in transmutation_matrix[col]):
+            continue
+        else:
+            drop_col.append(col)
+    transmutation_matrix.drop(columns=drop_col, inplace=True)
 
     transmutation_matrix.to_csv(output_file)
 
