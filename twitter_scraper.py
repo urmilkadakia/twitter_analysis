@@ -7,8 +7,8 @@ import zipfile
 import os
 from util import flatten_json
 
-KEY_LIST = ['id', 'id', 'id_str', 'name', 'screen_name', 'location', 'description', "followers_count",
-            'friends_count', 'created_at']
+KEY_LIST = ['id', 'id_str', 'name', 'screen_name', 'location', 'description', "followers_count", 'friends_count',
+            'statuses_count', 'created_at']
 
 
 class TwitterScraper:
@@ -34,12 +34,13 @@ class TwitterScraper:
         self.input_file_path = input_file
         self.output_file_path = output_file
 
-    def generate_file(self, format=json, clean_userid=0):
+    def generate_file(self, format=json, size=0, clean_userid=0):
         """
         Method to send the api calls to twitter and get the user data in the json format. The method stores all the
         data in the user specified format(json or csv) in the zip file format to reduce the storage space and also
         prints out the list of failed user ids.
         :param format: format of output file json or csv
+        :param size: Specify 1 if you do not want to store tweets with profile information. This will reduce file size.
         :param clean_userid: a flag to store the list of user ids for which we get the data without any error. Pass 1
                              to store the list as csv file.
         """
@@ -86,14 +87,26 @@ class TwitterScraper:
 
                 # Store the converted user status data in the output file
                 if format == "json":
-                    json_list.extend(statuses)
+                    if size == 1:
+                        status_list = []
+                        for status in statuses:
+                            user_dict = {}
+                            for key in KEY_LIST:
+                                user_dict[key] = status[key]
+                            status_list.append(user_dict)
+                        json_list.extend(status_list)
+                    else:
+                        json_list.extend(statuses)
                 # If defined format is csv then the following code snippet will store the user status
                 # data into csv format in the output file
                 else:
                     for status in statuses:
                         # Function will return the 1 dimensional row vector for the given status
                         status = flatten_json(status)
-                        status_list = [status[key] for key in KEY_LIST]
+                        if size == 1:
+                            status_list = [status[key] for key in KEY_LIST]
+                        else:
+                            status_list = status
 
                         # If we are writing the first line of the output file then following code will
                         # write the headers of each column in the output file

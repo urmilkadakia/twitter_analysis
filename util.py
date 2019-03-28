@@ -33,6 +33,9 @@ def parse_args():
                         help="Path to output file")
     parser.add_argument("-f", dest="format", required=False, choices=["json", "csv"],
                         help="Specify the format of the output file", default="json", type=str)
+    parser.add_argument("-s", dest="size", required=False,
+                        help="Specify 1 if you do not want to store tweets with profile information. "
+                             "This will reduce file size.", default=0, type=int)
     parser.add_argument("-u", dest="clean_userid", required=False,
                         help="Specify 1 if want to store a cleaned list of user ids", default=0, type=int)
     parser.add_argument("-n", dest="n", required=False,
