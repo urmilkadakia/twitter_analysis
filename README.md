@@ -42,19 +42,21 @@ pip install botometer
    - This code takes the list the userids as input and return 2 files. The first file contains the user lookups and second file contains the a list of userids that are are not unknown, suspended or deleted.
    - Use the following command to run profile_collector.py on terminal:
    ```
-   python profile_collector.py -i1 <input file> -o <output file folder path> -f <json|csv> -u <1|0>
+   python profile_collector.py -i1 <input file> -o <output file folder path> -f <json|csv> -s <1|0> -u <1|0>
    ```
    - Pass `-h` as argument for help menu.
+2. 
    
- 2. **botornot.py**
+ 2. **account_methods.bot_or_not()**
     - This code returns a file which contains the botometer score for each user.
     - Use the following command to run botornot.py on terminal:
-    ```
-    python botornot.py -i1 <input file> -o <output file>
-    ```
-    - Pass `-h` as argument for the help menu.
+    - Parameters:
+      - input_file: Path to the input file
+      - output_file: Path to the output file
+    - return: returns a file which contains the botometer score for each user.
+
     
- 3. **ngram_analysis.count_ngram_frequency()**
+ 3. **ngram_methods.count_ngram_frequency()**
     - The function will count the frequencies for the given ngram
     - Parameters:
       - input_file: Path to the input file
@@ -62,20 +64,20 @@ pip install botometer
               represents unigrams.
     - return: Returns the dictionary of ngram and frequency as the key value pairs sorted in the decreasing order.  
     
- 4. **ngram_analysis.ngram_frequency_dist()**
+ 4. **ngram_methods.ngram_frequency_dist()**
      - The function counts the frequency of each ngram specified by the input parameter n and store the output as the csv at the output file location.
      - Parameters:
        - input_file: Path to the input file
        - output_file: Path to the output file
        - n represents the n in n-gram which is a contiguous sequence of n item
- 5. **ngram_analysis.changing_ngram()**
+ 5. **ngram_methods.changing_ngram()**
      - The function counts the difference between the frequencies of the two given files for the specified ngram and store it in the output file path folder.
      - Parameteres:
        - input_file1: Path to the input file 1
        - input_file2: Path to the input file 2
        - output_file: Path to the output file
        - n: n represents the n in n-gram which is a contiguous sequence of n items.
- 6. **ngram_analysis.daily_ngram_collector()**
+ 6. **ngram_methods.daily_ngram_collector()**
      - The function reads all the files that are in the input file folder and counts the ngram frequencies for all the ngrams in the file and finally combine them all in a date vise sorted csv file.
      - Parameters:
        - input_file_path: Path to the folder in which input files are stored
@@ -84,12 +86,12 @@ pip install botometer
             represents unigrams.
        - cutoff_freq: The ngrams that has less frequency than the cut off frequency will not be included in the
                       output file. The default value is 5.
- 7. **ngram_analysis.char_length_histogram()**
+ 7. **ngram_methods.char_length_histogram()**
      - The function to plot and store the histogram of the character length description of each user in the file
      - Parameters:
        - input_file: Path to the input file
        - output_file: Path to the output file
- 8. **ngram_analysis.ngram_histogram()**
+ 8. **ngram_methods.ngram_histogram()**
      - The function to plot and store the histogram of the specified ngram and their frequencies for the ngrams which has frequency greater than cutoff_freq
      - Parameters:
        - input_file: Path to input file
@@ -97,12 +99,52 @@ pip install botometer
        - n: n represents the n in n-gram which is a contiguous sequence of n items. The default vale is 1 which
             represents unigrams.
        - cutoff_freq: The ngrams that has less frequency than the cut off frequency will not be included in the
-                           output file. The default value is 5.
- 9. **ngram_analysis.get_locations()**
+                      output file. The default value is 5.
+ 9. **ngram_methods.ngram_adjacency_matrix()**
+    - The function writes the adjacency matrix to the output file, where the rows and columns are ngram and each cell is
+      the number of users that has both the ngram in their description.
+    - Parameters:
+      - input_file: Path to input file
+      - output_file: Path to output file
+      - n: n represents the n in n-gram which is a contiguous sequence of n items. The default vale is 1 which
+            represents unigrams.
+      - cutoff_freq: The ngrams that has less frequency than the cut off frequency will not be included in the
+                      output file. The default value is 5.
+ 10. **ngram.methods.ngram_alloy_matrix()**
+     - Alloy matrix count the number of new ngram pairings. If a ngram A is present at time 1 and at time 2. If a ngram B is not present at time 1 but present at time 2, then AB is an alloy and its count will incremented by 1 for each new occurrence.
+     - Parameter:
+       - input_file1: Path to input file 1
+       - input_file2: Path to input file 2
+       - output_file: Path to output file
+       - n: n represents the n in n-gram which is a contiguous sequence of n items. The default vale is 1 which
+            represents unigrams.
+ 11. **ngram_methods.ngram_transmutation_matrix()**
+     - Alloy matrix count the number of new ngram pairings. If a ngram A is present at time 1 but not at time 2.
+       If a ngram B is not present at time 1 but present at time 2, then AB is an alloy and its count will incremented by 1 for each new occurrence.
+     - Parameters:
+       - input_file1: Path to input file 1
+       - input_file2: Path to input file 2
+       - output_file: Path to output file
+       - n: n represents the n in n-gram which is a contiguous sequence of n items. The default vale is 1 which
+            represents unigrams.
+       - cutoff_freq: The ngrams that has less frequency than the cut off frequency will not be included in the
+                      output file. The default value is 5.
+ 12. **account_methods.get_locations()**
      - The function writes the user id and his/her us state name in the output file based on the the value of location key in the user information and state_location dictionary. If function does not find the location in the state_locations dictionary then not in usa will be written against the user id.
      - Parameters:
        - input_file1: Path to input file
-       - input_file2: Path to the usa location file
+       - input_file2: Path to the usa location file 
+       - output_file: Path to output file
+ 13. **account_methods.entities_count_difference()**
+     - The function calculates the difference between the followers count, following count, total tweets and total likes        of each user between the two input files that  are generate at two different time.
+     - Parameters:
+       - input_file1: Path to user profiles file of a specific date (earlier date)
+       - input_file2: Path to user profiles file of a specific date (later date)
+       - output_file: Path to output file
+ 14. **account_methods.description_change_frequency()**
+     - The function calculates and store the number of times the user has made changes in his/her description.
+     - Parameters:
+       - input_file_path: Path where all the daily user profiles are stored
        - output_file: Path to output file
 ## Crontab
      - The crontab runs the given tasks in the background at specific times. We can use the crontab to scrape the user profiles daily.
