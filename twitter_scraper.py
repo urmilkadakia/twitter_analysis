@@ -176,6 +176,7 @@ class TwitterScraper:
         time_str = time.strftime("%Y_%m_%d")
         curr_year, curr_month, curr_date = time_str.split('_')
         first_flag = 1
+        users_profiles = {}
         for date in range(1, int(curr_date)):
             if date > 9:
                 date = str(date)
@@ -183,11 +184,11 @@ class TwitterScraper:
                 date = '0' + str(date)
             input_f = self.output_file_path + curr_year + "_" + curr_month + "_" + str(date) + '_profiles_' + \
                       str(self.length_of_file) + '.zip'
+            if not os.path.exists(input_f):
+                continue
             if first_flag:
                 users_profiles = get_user_profile_dict(input_f)
                 first_flag = 0
-                continue
-            if not os.path.exists(input_f):
                 continue
             temp_user_profiles = get_user_profile_dict(input_f)
 

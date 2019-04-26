@@ -5,6 +5,8 @@ import zipfile
 import json
 import pandas as pd
 
+# Crontab
+# cd /gpfs/home/ukadakia/twitter_analysis-master && python profile_collector.py -i1 Data/random_users_million.csv -o OUTPUT/ -f json -u 1 -s 0
 
 def is_valid_file(parser, arg):
     """
