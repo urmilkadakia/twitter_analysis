@@ -47,11 +47,6 @@ pip install botometer
      - size: Specify 1 if you do not want to store tweets with profile information. This will reduce file size
      - clean_userid: a flag to store the list of user ids for which we get the data without any error. Pass 1
                      to store the list as csv file
-   - Use the following command to run profile_collector.py on terminal:
-   ```
-   python profile_collector.py -i1 <input file> -o <output file folder path> -f <json|csv> -s <1|0> -u <1|0>
-   ```
-   - Pass `-h` as argument for help menu.
 2. **twitter_scraper.reconstruct_data()**
    - This function calls the reconstruct_data_dictionary function to get the updated user profiles dictionary and
      store it as a zip file in the user specified location.
@@ -155,6 +150,14 @@ pip install botometer
      - Parameters:
        - input_file_path: Path where all the daily user profiles are stored
        - output_file: Path to output file
+## Example
+    - Use the following command to run profile_collector.py on terminal:
+    ```
+    python profile_collector.py -i1 <input file> -o <output file folder path> -f <json|csv> -s <1|0> -u <1|0>
+    ```
+    - Pass `-h` as argument for help menu.
+    - To run any fuction that are in the account_methods or ngram_methods. See driver.py file.
+    - import the function that you want to run on the data in the driver file and use the fuction as discussed above.
 ## Crontab
      - The crontab runs the given tasks in the background at specific times. We can use the crontab to scrape the user profiles daily.
      - Follow the below commands to setup the crontab on your system:
