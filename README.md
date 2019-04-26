@@ -151,30 +151,30 @@ pip install botometer
        - input_file_path: Path where all the daily user profiles are stored
        - output_file: Path to output file
 ## Example
-    - Use the following command to run profile_collector.py on terminal:
-    ```
-    python profile_collector.py -i1 <input file> -o <output file folder path> -f <json|csv> -s <1|0> -u <1|0>
-    ```
-    - Pass `-h` as argument for help menu.
-    - To run any fuction that are in the account_methods or ngram_methods. See driver.py file.
-    - import the function that you want to run on the data in the driver file and use the fuction as discussed above.
+- Use the following command to run profile_collector.py on terminal:
+```
+python profile_collector.py -i1 <input file> -o <output file folder path> -f <json|csv> -s <1|0> -u <1|0>
+```
+- Pass `-h` as argument for help menu.
+- To run any fuction that are in the account_methods or ngram_methods. See driver.py file.
+- import the function that you want to run on the data in the driver file and use the fuction as discussed above.
 ## Crontab
-     - The crontab runs the given tasks in the background at specific times. We can use the crontab to scrape the user profiles daily.
-     - Follow the below commands to setup the crontab on your system:
-       - open terminal
-       - Use command `crontab -e` to open or edit the crontab file.
-       - If asked to select an editor choose according to your preference. **Nano** is the easiest.
-       - Use arrow keys to reach to the bottom of the file.
-       - Lines in the crontab has the following format:
+- The crontab runs the given tasks in the background at specific times. We can use the crontab to scrape the user profiles daily.
+- Follow the below commands to setup the crontab on your system:
+  - open terminal
+  - Use command `crontab -e` to open or edit the crontab file.
+  - If asked to select an editor choose according to your preference. **Nano** is the easiest.
+  - Use arrow keys to reach to the bottom of the file.
+  - Lines in the crontab has the following format:
        ```
        minute(0-59) hour(0-23) day(1-31) month(1-12) weekday(0-6) command
        ```
-       - Use * to match any value.
-       -   Write the follwoing command in the file to run the profile collector daily at 9:59 am:
+  - Use * to match any value.
+  -   Write the follwoing command in the file to run the profile collector daily at 9:59 am:
        ```
        59 9 * * * cd <path where all the files are stored> && /usr/bin/python <path to profile_collector.py> -i <input file> -o <output file folder path> -f <json|csv> -u <1|0>
        ```
-       - The location or the name of the python interpreter may vary.
+  - The location or the name of the python interpreter may vary.
 
 
 ### License
