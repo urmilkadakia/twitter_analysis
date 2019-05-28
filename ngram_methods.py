@@ -331,7 +331,7 @@ def ngram_alloy_matrix(input_file1, input_file2, output_file, n):
 
     for user in user_description1:
         if user in user_description2:
-            user_ngram_list1 = get_ngram_list(user_description1[user], n)
+            user_ngram_list1 = get_ngram_list(user_description1[user], n)   # convert to set
             user_ngram_list2 = get_ngram_list(user_description2[user], n)
             for ngram2 in user_ngram_list2:
                 if ngram2 not in user_ngram_list1:
@@ -426,6 +426,46 @@ def ngram_transmutation_matrix(input_file1, input_file2, output_file, n):
     transmutation_matrix.drop(columns=drop_col, inplace=True)
 
     transmutation_matrix.to_csv(output_file)
+
+
+def ngram_document_term_matrix(input_file, word_list_file, output_file, n):
+    """
+    The function writes the adjacency matrix to the output file, where the rows and columns are ngram and each cell is
+    the number of users that has both the ngram in their description.
+    :param input_file: Path to input file
+    :param word_list_file: Path to the word list. This list contains the word for which you want to count the frequency
+    :param output_file: Path to output file
+    :param n: n represents the n in n-gram which is a contiguous sequence of n items. The default vale is 1 which
+              represents unigram.
+    """
+    word_list = []
+    with open(word_list_file) as file:
+        for line in file:
+            line = line.strip()
+            word_list.append(line.lower())
+
+    columns = ['id', 'description'] + word_list
+    matrix = pd.DataFrame(np.zeros(shape=(1, len(columns))), columns=columns)
+    temp = {word: 0 for word in word_list}
+    with zipfile.ZipFile(input_file, 'r') as z:
+        for filename in z.namelist():
+            with z.open(filename) as f:
+                json_list = json.load(f)
+
+    for user in json_list:
+        text = user['description']
+
+        ngram_list = get_ngram_list(text, n)
+        for word in ngram_list:
+            if n == 1:
+                if word[0] in word_list:
+                    temp[word[0]] = 1
+            else:
+                if word in word_list:
+                    temp[word] = 1
+        matrix.loc[user['id_str']] = [user['id_str']] + [text] + list(temp.values())
+    matrix.set_index('id', inplace=True)
+    matrix.to_csv(output_file)
 
 
 
