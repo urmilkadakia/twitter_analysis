@@ -115,9 +115,9 @@ pip install botometer
        - n: n represents the n in n-gram which is a contiguous sequence of n items. The default vale is 1 which
             represents unigrams.
 11. **ngram_methods.ngram_transmutation_matrix()**
-     - Alloy matrix count the number of new ngram pairings. If a ngram A is present at time 1 but not at time 2.
+    - Alloy matrix count the number of new ngram pairings. If a ngram A is present at time 1 but not at time 2.
        If a ngram B is not present at time 1 but present at time 2, then AB is an alloy and its count will incremented by 1 for each new occurrence.
-     - Parameters:
+    - Parameters:
        - input_file1: Path to input file 1
        - input_file2: Path to input file 2
        - output_file: Path to output file
@@ -125,6 +125,15 @@ pip install botometer
             represents unigrams.
        - cutoff_freq: The ngrams that has less frequency than the cut off frequency will not be included in the
                       output file. The default value is 5.
+12. **ngram_document_term_matrix()**
+    - The function writes the adjacency matrix to the output file, where the rows and columns are ngram and each cell is
+    the number of users that has both the ngram in their description.
+    - Parameters:
+      - input_file: Path to input file
+      - word_list_file: Path to the word list. This list contains the word for which you want to count the frequency
+      - output_file: Path to output file
+      - n: n represents the n in n-gram which is a contiguous sequence of n items. The default vale is 1 which
+              represents unigram.
 
 12. **account_methods.bot_or_not()**
     - This code returns a file which contains the botometer score for each user.
