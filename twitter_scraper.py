@@ -167,6 +167,7 @@ class TwitterScraper:
         logger.info('Number of successful ID:' + str(self.length_of_file - len(user_id_failed)) + ' and '
                     + 'Number of failed ID:' + str(len(user_id_failed)))
 
+
     def generate_longitudinal_data(self, data_list):
         """
         This function will take the array of all the profiles and return an array of profiles that have made changes in
@@ -225,6 +226,7 @@ class TwitterScraper:
         This function calls the reconstruct_data_dictionary function to get the updated user profiles dictionary and
         store it as a zip file in the user specified location.
         """
+
         time_str = time.strftime("%Y_%m_%d")
         user_profiles = self.reconstruct_data_dictionary()
         json_status = json.dumps(list(user_profiles.values()))

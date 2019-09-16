@@ -23,6 +23,5 @@ def main():
     # ngram_transmutation_matrix(args.input_file1, args.input_file2, args.output_file, args.n)
     # ngram_document_term_matrix(args.input_file1, args.input_file2, args.output_file, args.n)
 
-
 if __name__ == "__main__":
     main()

@@ -63,6 +63,7 @@ def bot_or_not(input_file_path, output_file_path):
     input_file = open(input_file_path)
     for line in input_file:
         accounts.append(int(float(line.strip())))
+
         # Call the lookup function for a list of 100 user IDs
         if count % 100 == 0 or count == length_of_file:
             try:
@@ -183,6 +184,7 @@ def description_change_frequency(input_file_path, output_file):
     for file in sorted(glob.glob(os.path.join(input_file_path, '*.zip')), key=date_sort):
         with zipfile.ZipFile(file, 'r') as z:
             for filename in z.namelist():
+
                 with z.open(filename) as f:
                     if base_flag:
                         base_json_list = json.load(f)

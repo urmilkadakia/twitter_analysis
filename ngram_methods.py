@@ -12,8 +12,6 @@ import os
 import glob
 import numpy as np
 import zipfile
-import time
-import logging
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from util import date_sort, get_user_description_dict
