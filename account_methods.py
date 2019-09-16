@@ -7,7 +7,23 @@ import json
 import re
 import glob
 import pandas as pd
-from util import generate_state_dictionary, get_user_profile_dict, date_sort
+import time
+import logging
+import requests
+import tweepy
+from util import generate_state_dictionary, get_user_profile_dict, date_sort, log_tweep_error
+
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+filename = 'account_methods' + time.strftime("%m_%Y") + '.log'
+file_handler = logging.FileHandler(filename)
+
+formatter = logging.Formatter('%(asctime)s:%(levelname)s:%(name)s:%(message)s')
+file_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
 
 
 def bot_or_not(input_file_path, output_file_path):
@@ -20,7 +36,15 @@ def bot_or_not(input_file_path, output_file_path):
     input_file = open(input_file_path)
     output_file = csv.writer(open(output_file_path, "w+"))
 
-    mashape_key = api_keys.mashape_key
+    try:
+        auth = tweepy.OAuthHandler(api_keys.api_key, api_keys.api_secret_key)
+        auth.set_access_token(api_keys.access_token, api_keys.access_token_secret)
+        auth.get_authorization_url()
+    except tweepy.TweepError as e:
+        log_tweep_error(logger, e)
+        del auth
+        exit(1)
+
     twitter_app_auth = {
         'consumer_key': api_keys.api_key,
         'consumer_secret': api_keys.api_secret_key,
@@ -28,7 +52,7 @@ def bot_or_not(input_file_path, output_file_path):
         'access_token_secret': api_keys.access_token_secret,
     }
     bom = botometer.Botometer(wait_on_ratelimit=True,
-                              mashape_key=mashape_key,
+                              mashape_key=api_keys.mashape_key,
                               **twitter_app_auth)
 
     count = 1
@@ -39,27 +63,30 @@ def bot_or_not(input_file_path, output_file_path):
     input_file = open(input_file_path)
     for line in input_file:
         accounts.append(int(float(line.strip())))
-        # Call the lookup function for a list 100 user IDs
+        # Call the lookup function for a list of 100 user IDs
         if count % 100 == 0 or count == length_of_file:
-            for screen_name, result in bom.check_accounts_in(accounts):
-                # print(screen_name,result)
-                if 'error' in result.keys():
-                    output_file.writerow([str(screen_name), 'error'])
-                    failed_count += 1
-                    continue
-                output_file.writerow([str(screen_name), str(result['cap']['universal'])])
+            try:
+                for screen_name, result in bom.check_accounts_in(accounts):
+                    if 'error' in result.keys():
+                        output_file.writerow([str(screen_name), 'error'])
+                        failed_count += 1
+                        continue
+                    output_file.writerow([str(screen_name), str(result['cap']['universal'])])
+            except requests.exceptions.HTTPError as e:
+                logger.error("invalid Botometer(RapidAPI mashape application) authentication key")
+                exit(1)
             accounts.clear()
         count += 1
-    print("Number of failed IDs:", failed_count)
+    logger.info('Number of successful ID:' + str(length_of_file - failed_count) + ' and '
+                + 'Number of failed ID:' + str(failed_count))
 
 
-def get_locations(input_file1, input_file2, output_file):
+def get_locations(input_file1, output_file):
     """
-    The function writes the user id and his/her us state name in the output file based on the the value of location key in the user
-    information and state_location dictionary. If function does not find the location in the state_locations dictionary
-    then not in usa will be written against the user id.
+    The function writes the user id and his/her us state name in the output file based on the the value of location key
+    in the user information and state_locations mapping. If function does not find the location in the state_locations
+    mapping then N/A will be written against the user id.
     :param input_file1: Path to input file
-    :param input_file2: Path to the usa location file
     :param output_file: Path to output file
     """
     with zipfile.ZipFile(input_file1, 'r') as z:
@@ -67,7 +94,7 @@ def get_locations(input_file1, input_file2, output_file):
             with z.open(filename) as f:
                 json_list = json.load(f)
 
-    state_locations = generate_state_dictionary(input_file2)
+    state_locations = generate_state_dictionary()
     location_dict = {}
     for item in json_list:
         location_dict[item['id']] = re.split(r'[`\-=~!@#$%^&*()_+\[\]{};\'\\:"|<,./<>?]', item['location'].lower())
@@ -103,8 +130,7 @@ def get_locations(input_file1, input_file2, output_file):
             if us_flag == 1:
                 us_flag = 0
             else:
-                # print(location_dict[user_id])
-                location_dict[user_id] = 'not in usa'
+                location_dict[user_id] = 'N/A'
                 cnt += 1
 
     with open(output_file, 'w') as csvfile:
@@ -157,7 +183,6 @@ def description_change_frequency(input_file_path, output_file):
     for file in sorted(glob.glob(os.path.join(input_file_path, '*.zip')), key=date_sort):
         with zipfile.ZipFile(file, 'r') as z:
             for filename in z.namelist():
-                # print(filename)
                 with z.open(filename) as f:
                     if base_flag:
                         base_json_list = json.load(f)
@@ -192,7 +217,7 @@ def description_change_frequency(input_file_path, output_file):
     # Store the user change frequency dictionary as a csv file
     with open(output_file, "w+") as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(['user_id', 'location'])
+        writer.writerow(['user_id', 'change_frequency'])
         for key, value in user_change_freq.items():
             writer.writerow([key, value])
 

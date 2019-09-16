@@ -5,7 +5,20 @@ import csv
 import time
 import zipfile
 import os
-from util import flatten_json, get_user_profile_dict
+import logging
+from util import flatten_json, get_user_profile_dict, log_tweep_error
+
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+filename = 'twitter_analysis_' + time.strftime("%m_%Y") + '.log'
+file_handler = logging.FileHandler(filename)
+
+formatter = logging.Formatter('%(asctime)s:%(levelname)s:%(name)s:%(message)s')
+file_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
 
 KEY_LIST = ['id', 'id_str', 'name', 'screen_name', 'location', 'description', "followers_count", 'friends_count',
             'statuses_count', 'created_at']
@@ -23,11 +36,17 @@ class TwitterScraper:
         :param output_file: User input for path to the output folder
 
         api: Data member in the form of tweepy OAuthHandler object
-
         """
 
         auth = tweepy.OAuthHandler(api_keys.api_key, api_keys.api_secret_key)
         auth.set_access_token(api_keys.access_token, api_keys.access_token_secret)
+
+        try:
+            auth.get_authorization_url()
+        except tweepy.TweepError as e:
+            log_tweep_error(logger, e)
+            del auth
+            exit(1)
 
         # wait_on_rate_limit will put the running code on sleep and will resume it after rate limit time
         self.api = tweepy.API(auth_handler=auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
@@ -75,18 +94,17 @@ class TwitterScraper:
         inputfile = open(self.input_file_path, 'r')
         for line in inputfile:
             user_id_all.append(int(float(line.strip())))
-
+            status_object_list = []
             # Call the lookup function for a list 100 user IDs
             if count % 100 == 0 or count == self.length_of_file:
                 try:
                     status_object_list = self.api.lookup_users(user_ids=user_id_all)
-                except tweepy.TweepError:
-                    print("except")
+                except tweepy.TweepError as e:
+                    log_tweep_error(logger, e)
 
                 statuses = []
                 # Convert each element of the status_object_list to JSON format
                 for status_object in status_object_list:
-                    # print(status_object)
                     statuses.append(status_object._json)
                     user_id_success.append(status_object._json["id"])
 
@@ -146,8 +164,8 @@ class TwitterScraper:
         zipf.close()
         os.remove(output_file_name)
 
-        print("failed_IDs:", user_id_failed)
-        print("Number of failed ID:", len(user_id_failed))
+        logger.info('Number of successful ID:' + str(self.length_of_file - len(user_id_failed)) + ' and '
+                    + 'Number of failed ID:' + str(len(user_id_failed)))
 
     def generate_longitudinal_data(self, data_list):
         """
@@ -157,6 +175,11 @@ class TwitterScraper:
         :return: an array of profiles that have made changes in their descriptions
         """
         user_profiles = self.reconstruct_data_dictionary()
+
+        # When no base file found
+        if not user_profiles:
+            return data_list
+
         updated_user_profiles = []
         for profile in data_list:
             if profile["id_str"] in user_profiles and \
@@ -202,7 +225,6 @@ class TwitterScraper:
         This function calls the reconstruct_data_dictionary function to get the updated user profiles dictionary and
         store it as a zip file in the user specified location.
         """
-
         time_str = time.strftime("%Y_%m_%d")
         user_profiles = self.reconstruct_data_dictionary()
         json_status = json.dumps(list(user_profiles.values()))

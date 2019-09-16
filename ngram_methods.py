@@ -12,12 +12,15 @@ import os
 import glob
 import numpy as np
 import zipfile
+import time
+import logging
 import matplotlib as mpl
-mpl.use('Agg')
 import matplotlib.pyplot as plt
+from util import date_sort, get_user_description_dict
+
+mpl.use('Agg')
 nltk.download('punkt')
 nltk.download('stopwords')
-from util import date_sort, get_user_description_dict
 
 
 def get_ngram_list(text, n=1):

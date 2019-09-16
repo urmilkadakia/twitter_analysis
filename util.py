@@ -5,8 +5,6 @@ import zipfile
 import json
 import pandas as pd
 
-# Crontab
-# cd /gpfs/home/ukadakia/twitter_analysis-master && python profile_collector.py -i1 Data/random_users_million.csv -o OUTPUT/ -f json -u 1 -s 0
 
 def is_valid_file(parser, arg):
     """
@@ -81,23 +79,22 @@ def date_sort(file):
     return date
 
 
-def generate_state_dictionary(inputfile):
+def generate_state_dictionary():
     """
-    The function that read the input file which contains the information about the city, county, state id and state
-    names and returns a a dictionary object where key is state name and values is a set of cities and counties in
+    The function that reads uscities.csv file which contains the information about the city, county, state id and state
+    names and returns a hash map object where key is state name and values is a set of cities and counties in
     the state
-    :param inputfile: Path to input file which contains the information about the city, county, state id and state names
-    :return: Returns a dictionary object where key is state name and values is a set of cities and counties in
+    :return: Returns a hash map object where key is state name and values is a set of cities and counties in
              the state
     """
-    df = pd.read_csv(inputfile)
+    path_to_location_file = os.getcwd() + "/Data/uscities.csv"
+    df = pd.read_csv(path_to_location_file)
     state_locations = {}
 
     for index, row in df.iterrows():
         state_name = re.sub(r"[^a-zA-Z]+", ' ', row[3]).lower()
         if state_name not in state_locations:
             state_locations[state_name] = set()
-            # state_locations[state_name].add(state_name)
 
             # Adding state ID to the dictionary
             state_locations[state_name].add(re.sub(r"[^a-zA-Z]+", ' ', row[2]).lower())
@@ -151,3 +148,27 @@ def get_user_description_dict(input_file):
     return user_descriptions
 
 
+def log_tweep_error(logger, tweep_error):
+    """Log a TweepError exception."""
+    if tweep_error.api_code:
+        api_code = tweep_error.api_code
+    else:
+        api_code = int(re.findall(r'"code":[0-9]+', tweep_error.reason)[0].split(':')[1])
+    if api_code == 32:
+        logger.error("invalid Twitter API authentication tokens")
+    elif api_code == 34:
+        logger.error("requested object (user, Tweet, etc) not found")
+    elif api_code == 64:
+        logger.error("your Twitter developer account is suspended and is not permitted")
+    elif api_code == 130:
+        logger.error("Twitter is currently in over capacity")
+    elif api_code == 131:
+        logger.error("internal Twitter error occurred")
+    elif api_code == 135:
+        logger.error("could not authenticate your Twitter API tokens")
+    elif api_code == 136:
+        logger.error("you have been blocked to perform this action")
+    elif api_code == 179:
+        logger.error("you are not authorized to see this Tweet")
+    else:
+        logger.error("error while using the Twitter REST API: %s", tweep_error)
