@@ -12,7 +12,7 @@ from util import flatten_json, get_user_profile_dict, log_tweep_error
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-filename = 'twitter_analysis_' + time.strftime("%m_%Y") + '.log'
+filename = 'Logs/twitter_analysis_' + time.strftime("%m_%Y") + '.log'
 file_handler = logging.FileHandler(filename)
 
 formatter = logging.Formatter('%(asctime)s:%(levelname)s:%(name)s:%(message)s')
@@ -29,11 +29,11 @@ class TwitterScraper:
     Twitter_Scraper class contains the logic to scrape the given userId list and store it in the format of either
     json or csv.
     """
-    def __init__(self, input_file, output_file):
+    def __init__(self, input_file_path, output_file_path):
         """
         Method to initialized the class data members
-        :param input_file: User input for path to the input file
-        :param output_file: User input for path to the output folder
+        :param input_file_path: User input for path to the input file
+        :param output_file_path: User input for path to the output folder
 
         api: Data member in the form of tweepy OAuthHandler object
         """
@@ -50,8 +50,8 @@ class TwitterScraper:
 
         # wait_on_rate_limit will put the running code on sleep and will resume it after rate limit time
         self.api = tweepy.API(auth_handler=auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
-        self.input_file_path = input_file
-        self.output_file_path = output_file
+        self.input_file_path = input_file_path
+        self.output_file_path = output_file_path
         self.length_of_file = 0
 
     def generate_file(self, format=json, size=0, clean_userid=0):
@@ -71,7 +71,8 @@ class TwitterScraper:
 
         if format == 'csv':
             output_file_name = time_str + '_profiles_' + str(self.length_of_file) + '.csv'
-            output_file = csv.writer(open(self.output_file_path + output_file_name, "w+"))
+            output_file = open(self.output_file_path + output_file_name, "w+")
+            output_file_csv = csv.writer(output_file)
         else:
             output_file_name = time_str + '_profiles_' + str(self.length_of_file) + '.txt'
             output_file = open(self.output_file_path + output_file_name, "w+")
@@ -153,10 +154,10 @@ class TwitterScraper:
         else:
             # If we are writing the first line of the output file then following code will
             # write the headers of each column in the output file
-            output_file.writerow(KEY_LIST)
+            output_file_csv.writerow(KEY_LIST)
             if data_list:
                 for row in data_list:
-                    output_file.writerow(row)
+                    output_file_csv.writerow(row)
         output_file.close()
         os.chdir(self.output_file_path)
         zipf = zipfile.ZipFile(zip_file_name, 'w', zipfile.ZIP_DEFLATED)
@@ -167,6 +168,8 @@ class TwitterScraper:
         logger.info('Number of successful ID:' + str(self.length_of_file - len(user_id_failed)) + ' and '
                     + 'Number of failed ID:' + str(len(user_id_failed)))
 
+        print('Number of successful ID:' + str(self.length_of_file - len(user_id_failed)) + ' and '
+              + 'Number of failed ID:' + str(len(user_id_failed)))
 
     def generate_longitudinal_data(self, data_list):
         """
@@ -231,11 +234,11 @@ class TwitterScraper:
         user_profiles = self.reconstruct_data_dictionary()
         json_status = json.dumps(list(user_profiles.values()))
 
-        output_file_name = self.output_file_path + time_str + '_pprofiles_' + str(self.length_of_file) + '.txt'
+        output_file_name = self.output_file_path + time_str + '_full_profiles_' + str(self.length_of_file) + '.txt'
         output_file = open(output_file_name, "w+")
         output_file.write(json_status)
 
-        zip_file_name = time_str + '_pprofiles_' + str(self.length_of_file) + '.zip'
+        zip_file_name = time_str + '_full_profiles_' + str(self.length_of_file) + '.zip'
         os.chdir(self.output_file_path)
         zipf = zipfile.ZipFile(zip_file_name, 'w', zipfile.ZIP_DEFLATED)
         zipf.write(output_file_name)

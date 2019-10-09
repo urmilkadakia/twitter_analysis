@@ -3,6 +3,7 @@ import os
 import re
 import zipfile
 import json
+import time
 import pandas as pd
 
 
@@ -148,7 +149,59 @@ def get_user_description_dict(input_file):
     return user_descriptions
 
 
-def log_tweep_error(logger, tweep_error):
+def reconstruct_data_dictionary(input_file_folder_path, length_of_file, time_string=time.strftime("%Y_%m_%d")):
+    """
+    This function will reconstruct the a dictionary, where keys are user ids and values are corresponding
+    profile data. It uses the 1st day of the month as the base file and updates/adds the user profiles that have
+    made changes in their descriptions.
+    :return: A dictionary, , where keys are user ids and values are corresponding profile data.
+    """
+    curr_year, curr_month, curr_date = time_string.split('_')
+    first_flag = 1
+    users_profiles = {}
+    for date in range(1, int(curr_date)):
+        if date > 9:
+            date = str(date)
+        else:
+            date = '0' + str(date)
+        input_f = input_file_folder_path + curr_year + "_" + curr_month + "_" + str(date) + '_profiles_' \
+                  + str(length_of_file) + '.zip'
+        if not os.path.exists(input_f):
+            continue
+        if first_flag:
+            users_profiles = get_user_profile_dict(input_f)
+            first_flag = 0
+            continue
+        temp_user_profiles = get_user_profile_dict(input_f)
+
+        for user in temp_user_profiles:
+            users_profiles[user] = temp_user_profiles[user]
+
+    return users_profiles
+
+
+def reconstruct_data(input_file_path, output_file_path, length_of_file, time_string=time.strftime("%Y_%m_%d")):
+    """
+    This function calls the reconstruct_data_dictionary function to get the updated user profiles dictionary and
+    store it as a zip file in the user specified location.
+    """
+
+    user_profiles =reconstruct_data_dictionary(input_file_path, length_of_file, time_string)
+    json_status = json.dumps(list(user_profiles.values()))
+
+    output_file_name = output_file_path + time_string + '_full_profiles_' + str(length_of_file) + '.txt'
+    output_file = open(output_file_name, "w+")
+    output_file.write(json_status)
+
+    zip_file_name = time_string + '_full_profiles_' + str(length_of_file) + '.zip'
+    os.chdir(output_file_path)
+    zipf = zipfile.ZipFile(zip_file_name, 'w', zipfile.ZIP_DEFLATED)
+    zipf.write(output_file_name)
+    zipf.close()
+    os.remove(output_file_name)
+
+
+def log_tweep_error(logger, tweep_error, message=""):
     """Log a TweepError exception."""
     if tweep_error.api_code:
         api_code = tweep_error.api_code
@@ -171,4 +224,7 @@ def log_tweep_error(logger, tweep_error):
     elif api_code == 179:
         logger.error("you are not authorized to see this Tweet")
     else:
-        logger.error("error while using the Twitter REST API: %s", tweep_error)
+        if message:
+            logger.error("error while using the Twitter REST API: %s. Message = %s", tweep_error, message)
+        else:
+            logger.error("error while using the Twitter REST API: %s", tweep_error)
