@@ -1,6 +1,5 @@
 import os
 import botometer
-import api_keys
 import csv
 import zipfile
 import json
@@ -11,19 +10,56 @@ import time
 import logging
 import requests
 import tweepy
+
+import api_keys
 from util import generate_state_dictionary, get_user_profile_dict, date_sort, log_tweep_error
 
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-filename = 'account_methods' + time.strftime("%m_%Y") + '.log'
+filename = 'Logs/account_methods_' + time.strftime("%m_%Y") + '.log'
 file_handler = logging.FileHandler(filename)
 
 formatter = logging.Formatter('%(asctime)s:%(levelname)s:%(name)s:%(message)s')
 file_handler.setFormatter(formatter)
 
 logger.addHandler(file_handler)
+
+
+def get_twitter_user_id_from_screen_name(input_file_path, output_file_path):
+    """
+    Method to get the twitter user_id from the screen name
+    :param input_file_path: path to input file that contains the list of screen name
+    :param output_file_path: path to the output file where the corresponding the user_ids are saved
+    """
+
+    auth = tweepy.OAuthHandler(api_keys.api_key, api_keys.api_secret_key)
+    auth.set_access_token(api_keys.access_token, api_keys.access_token_secret)
+
+    try:
+        auth.get_authorization_url()
+    except tweepy.TweepError as e:
+        log_tweep_error(logger, e)
+        del auth
+        exit(1)
+
+    # wait_on_rate_limit will put the running code on sleep and will resume it after rate limit time
+    api = tweepy.API(auth_handler=auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
+
+    output_file = open(output_file_path, "w+")
+    output_file_csv = csv.writer(output_file)
+
+    with open(input_file_path, 'r')as file:
+        input_file = csv.reader(file, delimiter=',')
+        next(input_file)  # skip header
+        for row in input_file:
+            try:
+                output_file_csv.writerow([api.get_user(screen_name=row[1])._json["id"]])
+            except tweepy.TweepError as e:
+                print(e, row)
+                log_tweep_error(logger, e, "Error while accessing user " + row[0].strip() + " : " + row[1])
+    output_file.close()
 
 
 def bot_or_not(input_file_path, output_file_path):
