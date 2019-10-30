@@ -12,9 +12,12 @@ import os
 import glob
 import numpy as np
 import zipfile
+# import time
+from datetime import datetime as dt
+import datetime
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from util import date_sort, get_user_description_dict
+from util import date_sort, get_user_description_dict, reconstruct_data_dictionary, reconstruct_user_description_dictionary
 
 mpl.use('Agg')
 nltk.download('punkt')
@@ -469,11 +472,102 @@ def ngram_document_term_matrix(input_file, word_list_file, output_file, n):
     matrix.to_csv(output_file)
 
 
+def string_present_or_absent(text, pattern):
+    """
+
+    :param text:
+    :param pattern:
+    :return:
+    """
+    pattern = re.compile(pattern)
+    if re.search(pattern, text):
+        return 1
+    else:
+        return 0
 
 
+def cal_present_absent(input_file_folder_path, output_file_path, start_date, end_date, pattern):
+    """
 
+    :param input_file_folder_path:
+    :param output_file_path:
+    :param start_date:
+    :param end_date:
+    :param pattern:
+    """
 
+    user_present_absent_dict = {}
+    curr_date = start_date
+    length_of_file = 1000000
 
+    pattern = re.compile(pattern)
 
+    columns = ['date', 'p2p', 'p2a', 'a2p', 'a2a', 'total']
+    matrix = pd.DataFrame(columns=columns)
 
+    user_descriptions = reconstruct_user_description_dictionary(input_file_folder_path, length_of_file, curr_date)
 
+    p2p = 0
+    a2p = 0
+    p2a = 0
+    a2a = 0
+    for user in user_descriptions:
+        user_present_absent_dict[user] = 0
+        if re.search(pattern, user_descriptions[user]):
+            user_present_absent_dict[user] = 1
+            p2p += 1
+        else:
+            a2a += 1
+
+    total = p2p + a2a
+    matrix = matrix.append(pd.Series([curr_date, p2p, p2a, a2p, a2a, total], index=columns), ignore_index=True)
+
+    curr_date = dt.strptime(curr_date, '%Y_%m_%d')
+    curr_date += datetime.timedelta(days=1)
+    curr_date = dt.strftime(curr_date, '%Y_%m_%d')
+
+    end_date = dt.strptime(end_date, '%Y_%m_%d')
+    end_date += datetime.timedelta(days=1)
+    end_date = dt.strftime(end_date, '%Y_%m_%d')
+
+    while curr_date != end_date:
+        input_f = input_file_folder_path + curr_date + '_profiles_' \
+                  + str(length_of_file) + '.zip'
+
+        print(input_f)
+
+        if os.path.exists(input_f):
+            user_descriptions = get_user_description_dict(input_f)
+            for user in user_descriptions:
+
+                if re.search(pattern, user_descriptions[user]):
+                    if user not in user_present_absent_dict:
+                        user_present_absent_dict[user] = 1
+                        p2p += 1
+                    if user_present_absent_dict[user] == 0:
+                        user_present_absent_dict[user] = 1
+                        a2p += 1
+                        a2a -= 1
+                else:
+                    if user not in user_present_absent_dict:
+                        user_present_absent_dict[user] = 0
+                        a2a += 1
+                    if user_present_absent_dict[user] == 1:
+                        user_present_absent_dict[user] = 0
+                        p2a += 1
+                        p2p -= 1
+
+            total = p2p + p2a + a2p + a2a
+            matrix = matrix.append(pd.Series([curr_date, p2p, p2a, a2p, a2a, total], index=columns), ignore_index=True)
+
+            p2p += a2p
+            a2a += p2a
+            a2p = 0
+            p2a = 0
+
+        curr_date = dt.strptime(curr_date, '%Y_%m_%d')
+        curr_date += datetime.timedelta(days=1)
+        curr_date = dt.strftime(curr_date, '%Y_%m_%d')
+
+    matrix.set_index(columns[0], inplace=True)
+    matrix.to_csv(output_file_path)

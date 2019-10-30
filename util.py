@@ -111,25 +111,6 @@ def generate_state_dictionary():
     return state_locations
 
 
-def get_user_profile_dict(input_file):
-    """
-    The method read the json file and generates dictionary where each key is user id and corresponding value is his/her
-    profile data.
-    :param input_file: Path to input file
-    :return: Return a dictionary where user id is key and his/her twitter profile data is its value.
-    """
-    with zipfile.ZipFile(input_file, 'r') as z:
-        for filename in z.namelist():
-            with z.open(filename) as f:
-                json_list = json.load(f)
-
-    user_profiles = {}
-    for user in json_list:
-        user_profiles[user['id_str']] = user
-
-    return user_profiles
-
-
 def get_user_description_dict(input_file):
     """
     The method read the json file and generates dictionary where each key is user id and corresponding value is his/her
@@ -149,6 +130,56 @@ def get_user_description_dict(input_file):
     return user_descriptions
 
 
+def reconstruct_user_description_dictionary(input_file_folder_path, length_of_file, time_string=time.strftime("%Y_%m_%d")):
+    """
+    This function will reconstruct the a dictionary, where keys are user ids and values are corresponding
+    profile descriptions. It uses the 1st day of the month as the base file and updates/adds the user descriptions that
+    have made changes in their descriptions.
+    :return: A dictionary, , where keys are user ids and values are corresponding descriptions.
+    """
+    curr_year, curr_month, curr_date = time_string.split('_')
+    first_flag = 1
+    user_descriptions = {}
+    for date in range(1, int(curr_date) + 1):
+        if date > 9:
+            date = str(date)
+        else:
+            date = '0' + str(date)
+        input_f = input_file_folder_path + curr_year + "_" + curr_month + "_" + str(date) + '_profiles_' \
+                  + str(length_of_file) + '.zip'
+        if not os.path.exists(input_f):
+            continue
+        if first_flag:
+            user_descriptions = get_user_description_dict(input_f)
+            first_flag = 0
+            continue
+        temp_user_descriptions = get_user_description_dict(input_f)
+
+        for user in temp_user_descriptions:
+            user_descriptions[user] = temp_user_descriptions[user]
+
+    return user_descriptions
+
+
+def get_user_profile_dict(input_file):
+    """
+    The method read the json file and generates dictionary where each key is user id and corresponding value is his/her
+    profile data.
+    :param input_file: Path to input file
+    :return: Return a dictionary where user id is key and his/her twitter profile data is its value.
+    """
+    with zipfile.ZipFile(input_file, 'r') as z:
+        for filename in z.namelist():
+            with z.open(filename) as f:
+                json_list = json.load(f)
+
+    user_profiles = {}
+    for user in json_list:
+        user_profiles[user['id_str']] = user
+
+    return user_profiles
+
+
 def reconstruct_data_dictionary(input_file_folder_path, length_of_file, time_string=time.strftime("%Y_%m_%d")):
     """
     This function will reconstruct the a dictionary, where keys are user ids and values are corresponding
@@ -159,7 +190,7 @@ def reconstruct_data_dictionary(input_file_folder_path, length_of_file, time_str
     curr_year, curr_month, curr_date = time_string.split('_')
     first_flag = 1
     users_profiles = {}
-    for date in range(1, int(curr_date)):
+    for date in range(1, int(curr_date) + 1):
         if date > 9:
             date = str(date)
         else:
@@ -186,7 +217,7 @@ def reconstruct_data(input_file_path, output_file_path, length_of_file, time_str
     store it as a zip file in the user specified location.
     """
 
-    user_profiles =reconstruct_data_dictionary(input_file_path, length_of_file, time_string)
+    user_profiles = reconstruct_data_dictionary(input_file_path, length_of_file, time_string)
     json_status = json.dumps(list(user_profiles.values()))
 
     output_file_name = output_file_path + time_string + '_full_profiles_' + str(length_of_file) + '.txt'
