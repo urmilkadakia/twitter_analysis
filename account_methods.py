@@ -4,21 +4,20 @@ import csv
 import zipfile
 import json
 import re
-import glob
 import pandas as pd
-import time
+from datetime import datetime as dt
 import logging
 import requests
 import tweepy
-
+import datetime
 import api_keys
-from util import generate_state_dictionary, get_user_profile_dict, date_sort, log_tweep_error
+from util import generate_state_dictionary, get_user_profile_dict, log_tweep_error
 
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-filename = 'Logs/account_methods_' + time.strftime("%m_%Y") + '.log'
+filename = 'Logs/account_methods_' + dt.now().strftime("%m_%Y") + '.log'
 file_handler = logging.FileHandler(filename)
 
 formatter = logging.Formatter('%(asctime)s:%(levelname)s:%(name)s:%(message)s')
@@ -207,50 +206,64 @@ def entities_count_difference(input_file1, input_file2, output_file):
     entity_count_difference.to_csv(output_file)
 
 
-def description_change_frequency(input_file_path, output_file):
+def description_change_frequency(input_file_folder_path, output_file, start_date, end_date):
     """
     The function calculates and store the number of times the user has made changes in his/her description.
-    :param input_file_path: Path where all the daily user profiles are stored
+    :param input_file_folder_path: Path where all the daily user profiles are stored
     :param output_file: Path to output file
+    :param start_date: Date from which function will start to count the change
+    :param end_date: Date up to which function will count the change
     """
 
     base_flag = 1
     base_continue_flag = 0
     user_change_freq = {}
-    for file in sorted(glob.glob(os.path.join(input_file_path, '*.zip')), key=date_sort):
-        with zipfile.ZipFile(file, 'r') as z:
-            for filename in z.namelist():
+    curr_date = start_date
+    length_of_file = 100
 
-                with z.open(filename) as f:
-                    if base_flag:
-                        base_json_list = json.load(f)
-                        base_flag = 0
-                        base_continue_flag = 1
-                    else:
-                        compare_json_list = json.load(f)
-            if base_continue_flag == 1:
-                base_continue_flag = 0
-                continue
+    end_date = dt.strptime(end_date, '%Y_%m_%d')
+    end_date += datetime.timedelta(days=1)
+    end_date = dt.strftime(end_date, '%Y_%m_%d')
 
-        # Generating dictionaries to compare the user description between two time stamps
-        # Key is user id and value is the description of user
-        base_description = {}
-        for user in base_json_list:
-            base_description[user['id']] = user['description']
+    while curr_date != end_date:
+        input_f = os.path.join(input_file_folder_path, curr_date + '_profiles_' + str(length_of_file) + '.zip')
+        if os.path.exists(input_f):
+            with zipfile.ZipFile(input_f, 'r') as z:
+                for filename in z.namelist():
+                    with z.open(filename) as f:
+                        if base_flag:
+                            base_json_list = json.load(f)
+                            base_flag = 0
+                            base_continue_flag = 1
+                        else:
+                            compare_json_list = json.load(f)
+                if base_continue_flag == 1:
+                    base_continue_flag = 0
+                    continue
 
-        compare_description = {}
-        for user in compare_json_list:
-            compare_description[user['id']] = user['description']
+            # Generating dictionaries to compare the user description between two time stamps
+            # Key is user id and value is the description of user
+            base_description = {}
+            for user in base_json_list:
+                base_description[user['id']] = user['description']
 
-        # checking user has change its description or not if yes replace base case with new description for to capture
-        # future changes and increment the user change frequency by 1
-        for user_id in base_description:
-            if user_id in compare_description:
-                if user_id not in user_change_freq:
-                    user_change_freq[user_id] = 0
-                if base_description[user_id] != compare_description[user_id]:
-                    base_description[user_id] = compare_description[user_id]
-                    user_change_freq[user_id] += 1
+            compare_description = {}
+            for user in compare_json_list:
+                compare_description[user['id']] = user['description']
+
+            # Checking user has change its description or not if yes replace base case with new description for to capture
+            # Future changes and increment the user change frequency by 1
+            for user_id in base_description:
+                if user_id in compare_description:
+                    if user_id not in user_change_freq:
+                        user_change_freq[user_id] = 0
+                    if base_description[user_id] != compare_description[user_id]:
+                        base_description[user_id] = compare_description[user_id]
+                        user_change_freq[user_id] += 1
+
+        curr_date = dt.strptime(curr_date, '%Y_%m_%d')
+        curr_date += datetime.timedelta(days=1)
+        curr_date = dt.strftime(curr_date, '%Y_%m_%d')
 
     # Store the user change frequency dictionary as a csv file
     with open(output_file, "w+") as csvfile:
@@ -258,12 +271,3 @@ def description_change_frequency(input_file_path, output_file):
         writer.writerow(['user_id', 'change_frequency'])
         for key, value in user_change_freq.items():
             writer.writerow([key, value])
-
-
-
-
-
-
-
-
-
