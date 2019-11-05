@@ -3,16 +3,21 @@ import json
 import api_keys
 import csv
 import time
+from datetime import datetime as dt
 import zipfile
 import os
 import logging
-from util import flatten_json, get_user_profile_dict, log_tweep_error
+from util import flatten_json, log_tweep_error, reconstruct_data_dictionary, reconstruct_data
 
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-filename = 'Logs/twitter_analysis_' + time.strftime("%m_%Y") + '.log'
+filename = os.getcwd() + '/Logs/twitter_analysis_' + dt.now().strftime("%m_%Y") + '.log'
+
+if not os.path.exists(filename):
+    open(filename, 'w+').close()
+
 file_handler = logging.FileHandler(filename)
 
 formatter = logging.Formatter('%(asctime)s:%(levelname)s:%(name)s:%(message)s')
@@ -52,7 +57,8 @@ class TwitterScraper:
         self.api = tweepy.API(auth_handler=auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
         self.input_file_path = input_file_path
         self.output_file_path = output_file_path
-        self.length_of_file = 0
+        input_file = open(self.input_file_path, 'r')
+        self.length_of_file = len(input_file.readlines())
 
     def generate_file(self, format=json, size=0, clean_userid=0):
         """
@@ -65,9 +71,7 @@ class TwitterScraper:
                              to store the list as csv file.
         """
 
-        time_str = time.strftime("%Y_%m_%d")
-        input_file = open(self.input_file_path, 'r')
-        self.length_of_file = len(input_file.readlines())
+        time_str = dt.now().strftime("%Y_%m_%d")
 
         if format == 'csv':
             output_file_name = time_str + '_profiles_' + str(self.length_of_file) + '.csv'
@@ -98,11 +102,18 @@ class TwitterScraper:
             status_object_list = []
             # Call the lookup function for a list 100 user IDs
             if count % 100 == 0 or count == self.length_of_file:
-                try:
-                    status_object_list = self.api.lookup_users(user_ids=user_id_all)
-                except tweepy.TweepError as e:
-                    log_tweep_error(logger, e)
-
+                # Retry 3 times if there is a Twitter overfull/internal error
+                retry_count = 3
+                while True:
+                    try:
+                        status_object_list = self.api.lookup_users(user_ids=user_id_all)
+                    except tweepy.TweepError as e:
+                        log_tweep_error(logger, e)
+                        if retry_count > 0 and (e.api_code == 130 or e.api_code == 131):
+                            time.sleep(60)
+                            retry_count -= 1
+                            continue
+                    break
                 statuses = []
                 # Convert each element of the status_object_list to JSON format
                 for status_object in status_object_list:
@@ -178,7 +189,8 @@ class TwitterScraper:
         :param data_list: An array of all the profiles
         :return: an array of profiles that have made changes in their descriptions
         """
-        user_profiles = self.reconstruct_data_dictionary()
+        # user_profiles = self.reconstruct_data_dictionary()
+        user_profiles = reconstruct_data_dictionary(self.output_file_path, self.length_of_file)
 
         # When no base file found
         if not user_profiles:
@@ -193,60 +205,6 @@ class TwitterScraper:
 
         return updated_user_profiles
 
-    def reconstruct_data_dictionary(self):
-        """
-        This function will reconstruct the a dictionary, where keys are user ids and values are corresponding
-        profile data. It uses the 1st day of the month as the base file and updates/adds the user profiles that have
-        made changes in their descriptions.
-        :return: A dictionary, , where keys are user ids and values are corresponding profile data.
-        """
-        time_str = time.strftime("%Y_%m_%d")
-        curr_year, curr_month, curr_date = time_str.split('_')
-        first_flag = 1
-        users_profiles = {}
-        for date in range(1, int(curr_date)):
-            if date > 9:
-                date = str(date)
-            else:
-                date = '0' + str(date)
-            input_f = self.output_file_path + curr_year + "_" + curr_month + "_" + str(date) + '_profiles_' + \
-                      str(self.length_of_file) + '.zip'
-            if not os.path.exists(input_f):
-                continue
-            if first_flag:
-                users_profiles = get_user_profile_dict(input_f)
-                first_flag = 0
-                continue
-            temp_user_profiles = get_user_profile_dict(input_f)
-
-            for user in temp_user_profiles:
-                users_profiles[user] = temp_user_profiles[user]
-
-        return users_profiles
-
     def reconstruct_data(self):
-        """
-        This function calls the reconstruct_data_dictionary function to get the updated user profiles dictionary and
-        store it as a zip file in the user specified location.
-        """
 
-        time_str = time.strftime("%Y_%m_%d")
-        user_profiles = self.reconstruct_data_dictionary()
-        json_status = json.dumps(list(user_profiles.values()))
-
-        output_file_name = self.output_file_path + time_str + '_full_profiles_' + str(self.length_of_file) + '.txt'
-        output_file = open(output_file_name, "w+")
-        output_file.write(json_status)
-
-        zip_file_name = time_str + '_full_profiles_' + str(self.length_of_file) + '.zip'
-        os.chdir(self.output_file_path)
-        zipf = zipfile.ZipFile(zip_file_name, 'w', zipfile.ZIP_DEFLATED)
-        zipf.write(output_file_name)
-        zipf.close()
-        os.remove(output_file_name)
-
-
-
-
-
-
+        reconstruct_data(self.input_file_path, self.output_file_path, self.length_of_file)
