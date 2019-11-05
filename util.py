@@ -3,8 +3,9 @@ import os
 import re
 import zipfile
 import json
-import time
 import pandas as pd
+from datetime import datetime as dt
+import datetime
 
 
 def is_valid_file(parser, arg):
@@ -50,6 +51,35 @@ def parse_args():
     return args
 
 
+def log_tweep_error(logger, tweep_error, message=""):
+    """Log a TweepError exception."""
+    if tweep_error.api_code:
+        api_code = tweep_error.api_code
+    else:
+        api_code = int(re.findall(r'"code":[0-9]+', tweep_error.reason)[0].split(':')[1])
+    if api_code == 32:
+        logger.error("invalid Twitter API authentication tokens")
+    elif api_code == 34:
+        logger.error("requested object (user, Tweet, etc) not found")
+    elif api_code == 64:
+        logger.error("your Twitter developer account is suspended and is not permitted")
+    elif api_code == 130:
+        logger.error("Twitter is currently in over capacity")
+    elif api_code == 131:
+        logger.error("internal Twitter error occurred")
+    elif api_code == 135:
+        logger.error("could not authenticate your Twitter API tokens")
+    elif api_code == 136:
+        logger.error("you have been blocked to perform this action")
+    elif api_code == 179:
+        logger.error("you are not authorized to see this Tweet")
+    else:
+        if message:
+            logger.error("error while using the Twitter REST API: %s. Message = %s", tweep_error, message)
+        else:
+            logger.error("error while using the Twitter REST API: %s", tweep_error)
+
+
 def flatten_json(y):
     """
     Method to convert the multilayer JSON to 1 dimention row vector
@@ -67,17 +97,6 @@ def flatten_json(y):
     # Recursively call itself with the child dictionary
     flatten(y)
     return out
-
-
-def date_sort(file):
-    """
-    The function extracts the date from the filename and return it
-    :param file: the name of the file in the string format
-    :return: the extracted date from the filename as an integer of form yyyymmdd
-    """
-    date = re.findall(r'[0-9]{4}_[0-9]{2}_[0-9]{2}', file)[0]
-    date = int(''.join(date.split('_')))
-    return date
 
 
 def generate_state_dictionary():
@@ -130,33 +149,39 @@ def get_user_description_dict(input_file):
     return user_descriptions
 
 
-def reconstruct_user_description_dictionary(input_file_folder_path, length_of_file, time_string=time.strftime("%Y_%m_%d")):
+def reconstruct_user_description_dictionary(input_file_folder_path, length_of_file, end_date=dt.now().strftime("%Y_%m_%d")):
     """
     This function will reconstruct the a dictionary, where keys are user ids and values are corresponding
     profile descriptions. It uses the 1st day of the month as the base file and updates/adds the user descriptions that
     have made changes in their descriptions.
+    :param input_file_folder_path: Path to the folder in which input files are stored
+    :param length_of_file: number of the user id in the file
+    :param end_date: date up to which function will reconstruct data
     :return: A dictionary, , where keys are user ids and values are corresponding descriptions.
     """
-    curr_year, curr_month, curr_date = time_string.split('_')
+    # curr_year, curr_month, curr_date = time_string.split('_')
     first_flag = 1
     user_descriptions = {}
-    for date in range(1, int(curr_date) + 1):
-        if date > 9:
-            date = str(date)
-        else:
-            date = '0' + str(date)
-        input_f = input_file_folder_path + curr_year + "_" + curr_month + "_" + str(date) + '_profiles_' \
-                  + str(length_of_file) + '.zip'
-        if not os.path.exists(input_f):
-            continue
-        if first_flag:
-            user_descriptions = get_user_description_dict(input_f)
-            first_flag = 0
-            continue
-        temp_user_descriptions = get_user_description_dict(input_f)
 
-        for user in temp_user_descriptions:
-            user_descriptions[user] = temp_user_descriptions[user]
+    end_date = dt.strptime(end_date, '%Y_%m_%d')
+    curr_date = str(end_date.year) + '_' + str(end_date.month) + '_01'
+    end_date = dt.strftime(end_date, '%Y_%m_%d')
+
+    while curr_date != end_date:
+        input_f = os.path.join(input_file_folder_path, curr_date + '_profiles_' + str(length_of_file) + '.zip')
+        if os.path.exists(input_f):
+            if first_flag:
+                user_descriptions = get_user_description_dict(input_f)
+                first_flag = 0
+                continue
+            temp_user_descriptions = get_user_description_dict(input_f)
+
+            for user in temp_user_descriptions:
+                user_descriptions[user] = temp_user_descriptions[user]
+
+        curr_date = dt.strptime(curr_date, '%Y_%m_%d')
+        curr_date += datetime.timedelta(days=1)
+        curr_date = dt.strftime(curr_date, '%Y_%m_%d')
 
     return user_descriptions
 
@@ -180,82 +205,61 @@ def get_user_profile_dict(input_file):
     return user_profiles
 
 
-def reconstruct_data_dictionary(input_file_folder_path, length_of_file, time_string=time.strftime("%Y_%m_%d")):
+def reconstruct_data_dictionary(input_file_folder_path, length_of_file, end_date=dt.now().strftime("%Y_%m_%d")):
     """
     This function will reconstruct the a dictionary, where keys are user ids and values are corresponding
     profile data. It uses the 1st day of the month as the base file and updates/adds the user profiles that have
     made changes in their descriptions.
+    :param input_file_folder_path: Path to the folder in which input files are stored
+    :param length_of_file: number of the user id in the file
+    :param end_date: date up to which function will reconstruct data
     :return: A dictionary, , where keys are user ids and values are corresponding profile data.
     """
-    curr_year, curr_month, curr_date = time_string.split('_')
+
     first_flag = 1
     users_profiles = {}
-    for date in range(1, int(curr_date) + 1):
-        if date > 9:
-            date = str(date)
-        else:
-            date = '0' + str(date)
-        input_f = input_file_folder_path + curr_year + "_" + curr_month + "_" + str(date) + '_profiles_' \
-                  + str(length_of_file) + '.zip'
-        if not os.path.exists(input_f):
-            continue
-        if first_flag:
-            users_profiles = get_user_profile_dict(input_f)
-            first_flag = 0
-            continue
-        temp_user_profiles = get_user_profile_dict(input_f)
+    end_date = dt.strptime(end_date, '%Y_%m_%d')
+    curr_date = str(end_date.year) + '_' + str(end_date.month) + '_01'
+    end_date = dt.strftime(end_date, '%Y_%m_%d')
 
-        for user in temp_user_profiles:
-            users_profiles[user] = temp_user_profiles[user]
+    while curr_date != end_date:
+        input_f = os.path.join(input_file_folder_path, curr_date + '_profiles_' + str(length_of_file) + '.zip')
+        if os.path.exists(input_f):
+            if first_flag:
+                users_profiles = get_user_profile_dict(input_f)
+                first_flag = 0
+                continue
+            temp_user_profiles = get_user_profile_dict(input_f)
+
+            for user in temp_user_profiles:
+                users_profiles[user] = temp_user_profiles[user]
+        curr_date = dt.strptime(curr_date, '%Y_%m_%d')
+        curr_date += datetime.timedelta(days=1)
+        curr_date = dt.strftime(curr_date, '%Y_%m_%d')
 
     return users_profiles
 
 
-def reconstruct_data(input_file_path, output_file_path, length_of_file, time_string=time.strftime("%Y_%m_%d")):
+def reconstruct_data(input_file_folder_path, output_file_path, length_of_file, end_date=dt.now().strftime("%Y_%m_%d")):
     """
     This function calls the reconstruct_data_dictionary function to get the updated user profiles dictionary and
-    store it as a zip file in the user specified location.
+    store it as a zip file in the user specified location.    
+    :param input_file_folder_path: Path to the folder in which input files are stored
+    :param output_file_path: Path to the output file
+    :param length_of_file: number of the user id in the file
+    :param end_date: date up to which function will reconstruct data
     """
 
-    user_profiles = reconstruct_data_dictionary(input_file_path, length_of_file, time_string)
+    user_profiles = reconstruct_data_dictionary(input_file_folder_path, length_of_file, end_date)
     json_status = json.dumps(list(user_profiles.values()))
 
-    output_file_name = output_file_path + time_string + '_full_profiles_' + str(length_of_file) + '.txt'
+    output_file_name = os.path.join(output_file_path, end_date + '_full_profiles_' + str(length_of_file) + '.txt')
     output_file = open(output_file_name, "w+")
     output_file.write(json_status)
 
-    zip_file_name = time_string + '_full_profiles_' + str(length_of_file) + '.zip'
+    zip_file_name = end_date + '_full_profiles_' + str(length_of_file) + '.zip'
     os.chdir(output_file_path)
     zipf = zipfile.ZipFile(zip_file_name, 'w', zipfile.ZIP_DEFLATED)
     zipf.write(output_file_name)
     zipf.close()
     os.remove(output_file_name)
-
-
-def log_tweep_error(logger, tweep_error, message=""):
-    """Log a TweepError exception."""
-    if tweep_error.api_code:
-        api_code = tweep_error.api_code
-    else:
-        api_code = int(re.findall(r'"code":[0-9]+', tweep_error.reason)[0].split(':')[1])
-    if api_code == 32:
-        logger.error("invalid Twitter API authentication tokens")
-    elif api_code == 34:
-        logger.error("requested object (user, Tweet, etc) not found")
-    elif api_code == 64:
-        logger.error("your Twitter developer account is suspended and is not permitted")
-    elif api_code == 130:
-        logger.error("Twitter is currently in over capacity")
-    elif api_code == 131:
-        logger.error("internal Twitter error occurred")
-    elif api_code == 135:
-        logger.error("could not authenticate your Twitter API tokens")
-    elif api_code == 136:
-        logger.error("you have been blocked to perform this action")
-    elif api_code == 179:
-        logger.error("you are not authorized to see this Tweet")
-    else:
-        if message:
-            logger.error("error while using the Twitter REST API: %s. Message = %s", tweep_error, message)
-        else:
-            logger.error("error while using the Twitter REST API: %s", tweep_error)
