@@ -3,9 +3,9 @@ import os
 import re
 import zipfile
 import json
-import pandas as pd
 from datetime import datetime as dt
 import datetime
+import pandas as pd
 
 
 def is_valid_file(parser, arg):
@@ -137,32 +137,33 @@ def get_user_description_dict(input_file):
     :param input_file: path to input file
     :return: Return a dictionary where user id is key and his/her description is its value.
     """
+    user_descriptions = {}
+
     with zipfile.ZipFile(input_file, 'r') as z:
         for filename in z.namelist():
+            if z.getinfo(filename).file_size == 0:
+                return user_descriptions
             with z.open(filename) as f:
                 json_list = json.load(f)
 
-    user_descriptions = {}
     for user in json_list:
         user_descriptions[user['id_str']] = user['description']
 
     return user_descriptions
 
 
-def reconstruct_user_description_dictionary(input_file_folder_path, length_of_file, end_date=dt.now().strftime("%Y_%m_%d")):
+def reconstruct_user_description_dictionary(input_file_folder_path, length_of_file, end_date=dt.strftime(dt.now(), '%Y_%m_%d')):
     """
     This function will reconstruct the a dictionary, where keys are user ids and values are corresponding
     profile descriptions. It uses the 1st day of the month as the base file and updates/adds the user descriptions that
     have made changes in their descriptions.
     :param input_file_folder_path: Path to the folder in which input files are stored
-    :param length_of_file: number of the user id in the file
-    :param end_date: date up to which function will reconstruct data
+    :param length_of_file: number of user ids in the input file
+    :param end_date: date up to which the function will reconstruct the description dictionary
     :return: A dictionary, , where keys are user ids and values are corresponding descriptions.
     """
-    # curr_year, curr_month, curr_date = time_string.split('_')
     first_flag = 1
     user_descriptions = {}
-
     end_date = dt.strptime(end_date, '%Y_%m_%d')
     curr_date = str(end_date.year) + '_' + str(end_date.month) + '_01'
     end_date = dt.strftime(end_date, '%Y_%m_%d')
@@ -178,7 +179,6 @@ def reconstruct_user_description_dictionary(input_file_folder_path, length_of_fi
 
             for user in temp_user_descriptions:
                 user_descriptions[user] = temp_user_descriptions[user]
-
         curr_date = dt.strptime(curr_date, '%Y_%m_%d')
         curr_date += datetime.timedelta(days=1)
         curr_date = dt.strftime(curr_date, '%Y_%m_%d')
@@ -193,26 +193,29 @@ def get_user_profile_dict(input_file):
     :param input_file: Path to input file
     :return: Return a dictionary where user id is key and his/her twitter profile data is its value.
     """
+    user_profiles = {}
+
     with zipfile.ZipFile(input_file, 'r') as z:
         for filename in z.namelist():
+            if z.getinfo(filename).file_size == 0:
+                return user_profiles
             with z.open(filename) as f:
                 json_list = json.load(f)
 
-    user_profiles = {}
     for user in json_list:
         user_profiles[user['id_str']] = user
 
     return user_profiles
 
 
-def reconstruct_data_dictionary(input_file_folder_path, length_of_file, end_date=dt.now().strftime("%Y_%m_%d")):
+def reconstruct_data_dictionary(input_file_folder_path, length_of_file, end_date=dt.strftime(dt.now(), '%Y_%m_%d')):
     """
     This function will reconstruct the a dictionary, where keys are user ids and values are corresponding
     profile data. It uses the 1st day of the month as the base file and updates/adds the user profiles that have
     made changes in their descriptions.
     :param input_file_folder_path: Path to the folder in which input files are stored
-    :param length_of_file: number of the user id in the file
-    :param end_date: date up to which function will reconstruct data
+    :param length_of_file: number of user ids in the input file
+    :param end_date: date up to which the function will reconstruct the description dictionary
     :return: A dictionary, , where keys are user ids and values are corresponding profile data.
     """
 
@@ -233,6 +236,7 @@ def reconstruct_data_dictionary(input_file_folder_path, length_of_file, end_date
 
             for user in temp_user_profiles:
                 users_profiles[user] = temp_user_profiles[user]
+
         curr_date = dt.strptime(curr_date, '%Y_%m_%d')
         curr_date += datetime.timedelta(days=1)
         curr_date = dt.strftime(curr_date, '%Y_%m_%d')
@@ -240,20 +244,20 @@ def reconstruct_data_dictionary(input_file_folder_path, length_of_file, end_date
     return users_profiles
 
 
-def reconstruct_data(input_file_folder_path, output_file_path, length_of_file, end_date=dt.now().strftime("%Y_%m_%d")):
+def reconstruct_data(input_file_folder_path, output_file_path, length_of_file, end_date=dt.strftime(dt.now(), '%Y_%m_%d')):
     """
     This function calls the reconstruct_data_dictionary function to get the updated user profiles dictionary and
-    store it as a zip file in the user specified location.    
+    store it as a zip file in the user specified location.
+    :param output_file_path:
     :param input_file_folder_path: Path to the folder in which input files are stored
-    :param output_file_path: Path to the output file
-    :param length_of_file: number of the user id in the file
-    :param end_date: date up to which function will reconstruct data
+    :param length_of_file: number of user ids in the input file
+    :param end_date: date up to which the function will reconstruct the description dictionary
     """
 
     user_profiles = reconstruct_data_dictionary(input_file_folder_path, length_of_file, end_date)
     json_status = json.dumps(list(user_profiles.values()))
 
-    output_file_name = os.path.join(output_file_path, end_date + '_full_profiles_' + str(length_of_file) + '.txt')
+    output_file_name = output_file_path + end_date + '_full_profiles_' + str(length_of_file) + '.txt'
     output_file = open(output_file_name, "w+")
     output_file.write(json_status)
 
