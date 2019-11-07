@@ -138,13 +138,14 @@ def changing_ngram(input_file1, input_file2,  output_file, n=1, alpha_numeric_fl
             writer.writerow(item)
 
 
-def daily_ngram_collector(input_file_folder_path, output_file, start_date, end_date, n=1, cutoff_freq=5,
+def daily_ngram_collector(input_file_folder_path, output_file, number_of_users, start_date, end_date, n=1, cutoff_freq=5,
                           alpha_numeric_flag=0, stop_words_flag=0):
     """
     The function reads all the files generated between start date and end date and counts the ngram frequencies for all
     the ngrams in the file and finally combine them all in a date vise sorted csv file.
     :param input_file_folder_path: Path to the folder in which input files are stored
     :param output_file: Path to the output file
+    :param number_of_users: To identify the input file as they are named based on the number of users
     :param start_date: Date from which function will start to calculate the ngram frequencies
     :param end_date: Date up to which function will calculate the ngram frequencies
     :param n: n represents the n in n-gram which is a contiguous sequence of n items. The default vale is 1 which
@@ -156,14 +157,13 @@ def daily_ngram_collector(input_file_folder_path, output_file, start_date, end_d
     """
 
     curr_date = start_date
-    length_of_file = 100
 
     end_date = dt.strptime(end_date, '%Y_%m_%d')
     end_date += datetime.timedelta(days=1)
     end_date = dt.strftime(end_date, '%Y_%m_%d')
 
     while curr_date != end_date:
-        input_f = os.path.join(input_file_folder_path, curr_date + '_profiles_' + str(length_of_file) + '.zip')
+        input_f = os.path.join(input_file_folder_path, curr_date + '_profiles_' + str(number_of_users) + '.zip')
         if os.path.exists(input_f):
             ngram_freq = count_ngrams_frequency(input_f, n, alpha_numeric_flag, stop_words_flag)
             ngram_freq = ngram_freq.most_common()
@@ -510,7 +510,7 @@ def ngram_document_term_matrix(input_file, word_list_file, output_file, n=1, alp
     matrix.to_csv(output_file)
 
 
-def cal_present_absent(input_file_folder_path, output_file, start_date, end_date, pattern):
+def calculate_present_absent(input_file_folder_path, output_file, number_of_users, start_date, end_date, pattern):
     """
     This function calculates the number of times the twitter user has added ot removed the pattern defined here in
     his/her description. There are total 4 possible cases:
@@ -522,21 +522,21 @@ def cal_present_absent(input_file_folder_path, output_file, start_date, end_date
     start date and the end date in the output file.
     :param input_file_folder_path: Path to the folder in which input files are stored
     :param output_file: Path to the output file
+    :param number_of_users: To identify the input file as they are named based on the number of users
     :param start_date: Date from which function will start to calculate the ngram frequencies
     :param end_date: Date up to which function will calculate the ngram frequencies
-    :param pattern:
+    :param pattern: Pattern to search for in the description
     """
 
     user_present_absent_dict = {}
     curr_date = start_date
-    length_of_file = 100
 
     pattern = re.compile(pattern)
 
     columns = ['date', 'p2p', 'p2a', 'a2p', 'a2a', 'total']
     matrix = pd.DataFrame(columns=columns)
 
-    user_descriptions = reconstruct_user_description_dictionary(input_file_folder_path, length_of_file, curr_date)
+    user_descriptions = reconstruct_user_description_dictionary(input_file_folder_path, number_of_users, curr_date)
 
     p2p = 0
     a2p = 0
@@ -562,7 +562,7 @@ def cal_present_absent(input_file_folder_path, output_file, start_date, end_date
     end_date = dt.strftime(end_date, '%Y_%m_%d')
 
     while curr_date != end_date:
-        input_f = os.path.join(input_file_folder_path, curr_date + '_profiles_' + str(length_of_file) + '.zip')
+        input_f = os.path.join(input_file_folder_path, curr_date + '_profiles_' + str(number_of_users) + '.zip')
 
         if os.path.exists(input_f):
             user_descriptions = get_user_description_dict(input_f)
