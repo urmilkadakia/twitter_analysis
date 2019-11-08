@@ -60,15 +60,16 @@ class TwitterScraper:
         input_file = open(self.input_file_path, 'r')
         self.length_of_file = len(input_file.readlines())
 
-    def generate_file(self, format=json, size=0, clean_userid=0):
+    def generate_file(self, format=json, size_flag=False, clean_userid_flag=False):
         """
         Method to send the api calls to twitter and get the user data in the json format. The method stores all the
         data in the user specified format(json or csv) in the zip file format to reduce the storage space and also
         prints out the list of failed user ids.
         :param format: format of output file json or csv
-        :param size: Specify 1 if you do not want to store tweets with profile information. This will reduce file size.
-        :param clean_userid: a flag to store the list of user ids for which we get the data without any error. Pass 1
-                             to store the list as csv file.
+        :param size_flag: Specify True if you do not want to store tweets with profile information. This will reduce
+        file size. This only works with the json format.
+        :param clean_userid_flag: a flag to store the list of user ids for which we get the data without any error.
+        Pass True to store the list as csv file.
         """
 
         time_str = dt.now().strftime("%Y_%m_%d")
@@ -80,9 +81,9 @@ class TwitterScraper:
         else:
             output_file_name = time_str + '_profiles_' + str(self.length_of_file) + '.txt'
             output_file = open(self.output_file_path + output_file_name, "w+")
-        clean_userid_file = ''
-        if clean_userid:
-            clean_userid_file_name = 'new_userid_list_' + time_str + '.csv'
+
+        if clean_userid_flag:
+            clean_userid_file_name = time_str + '_userid_list_' + str(self.length_of_file) + '.csv'
             clean_userid_file = csv.writer(open(self.output_file_path + clean_userid_file_name, "w+"))
 
         zip_file_name = time_str + '_profiles_' + str(self.length_of_file) + '.zip'
@@ -122,7 +123,7 @@ class TwitterScraper:
 
                 # Store the converted user status data in the output file
                 if format == "json":
-                    if size == 1:
+                    if size_flag:
                         status_list = []
                         for status in statuses:
                             user_dict = {}
@@ -139,26 +140,25 @@ class TwitterScraper:
                     for status in statuses:
                         # Function will return the 1 dimensional row vector for the given status
                         status = flatten_json(status)
-                        if size == 1:
-                            status_list.extend([status[key] for key in KEY_LIST])
-                        else:
-                            status_list.extend(status)
+                        status_list.append([status[key] for key in KEY_LIST])
+
                     data_list.extend(status_list)
 
                 # Extending the list fo failed IDs after each call to api
                 user_id_failed.extend(list(set(user_id_all) - set(user_id_success)))
-                if clean_userid == 1:
+                if clean_userid_flag:
                     for user_id in user_id_success:
                         clean_userid_file.writerow([str(user_id)])
                 user_id_all.clear()
                 user_id_success.clear()
             count += 1
 
-        # retrieve updated records only
-        if time_str.split('_')[-1] != '01':
-            data_list = self.generate_longitudinal_data(data_list)
         # Convert the original file to zip file to reduce the storage space
         if format == 'json':
+            # retrieve updated records only
+            if time_str.split('_')[-1] != '01':
+                data_list = self.generate_longitudinal_data(data_list)
+
             if data_list:
                 json_status = json.dumps(data_list)
                 output_file.write(json_status)
@@ -189,7 +189,6 @@ class TwitterScraper:
         :param data_list: An array of all the profiles
         :return: an array of profiles that have made changes in their descriptions
         """
-        # user_profiles = self.reconstruct_data_dictionary()
         user_profiles = reconstruct_data_dictionary(self.output_file_path, self.length_of_file)
 
         # When no base file found
@@ -204,7 +203,3 @@ class TwitterScraper:
             updated_user_profiles.append(profile)
 
         return updated_user_profiles
-
-    def reconstruct_data(self):
-
-        reconstruct_data(self.input_file_path, self.output_file_path, self.length_of_file)
