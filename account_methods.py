@@ -206,11 +206,12 @@ def entities_count_difference(input_file1, input_file2, output_file):
     entity_count_difference.to_csv(output_file)
 
 
-def description_change_frequency(input_file_folder_path, output_file, start_date, end_date):
+def description_change_frequency(input_file_folder_path, output_file, number_of_users, start_date, end_date):
     """
     The function calculates and store the number of times the user has made changes in his/her description.
     :param input_file_folder_path: Path where all the daily user profiles are stored
     :param output_file: Path to output file
+    :param number_of_users: To identify the input file as they are named based on the number of users
     :param start_date: Date from which function will start to count the change
     :param end_date: Date up to which function will count the change
     """
@@ -219,14 +220,13 @@ def description_change_frequency(input_file_folder_path, output_file, start_date
     base_continue_flag = 0
     user_change_freq = {}
     curr_date = start_date
-    length_of_file = 100
 
     end_date = dt.strptime(end_date, '%Y_%m_%d')
     end_date += datetime.timedelta(days=1)
     end_date = dt.strftime(end_date, '%Y_%m_%d')
 
     while curr_date != end_date:
-        input_f = os.path.join(input_file_folder_path, curr_date + '_profiles_' + str(length_of_file) + '.zip')
+        input_f = os.path.join(input_file_folder_path, curr_date + '_profiles_' + str(number_of_users) + '.zip')
         if os.path.exists(input_f):
             with zipfile.ZipFile(input_f, 'r') as z:
                 for filename in z.namelist():
