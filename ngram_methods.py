@@ -487,7 +487,7 @@ def ngram_document_term_matrix(input_file, word_list_file, output_file, n=1, alp
             word_list.append(line.lower())
 
     columns = ['id', 'description'] + word_list
-    matrix = pd.DataFrame(np.zeros(shape=(1, len(columns))), columns=columns)
+    matrix = pd.DataFrame(columns=columns)
     temp = {word: 0 for word in word_list}
     with zipfile.ZipFile(input_file, 'r') as z:
         for filename in z.namelist():
@@ -505,7 +505,9 @@ def ngram_document_term_matrix(input_file, word_list_file, output_file, n=1, alp
             else:
                 if word in word_list:
                     temp[word] = 1
-        matrix.loc[user['id_str']] = [user['id_str']] + [text] + list(temp.values())
+        matrix = matrix.append(pd.Series([user['id_str']] + [text] + list(temp.values()), index=columns),
+                               ignore_index=True)
+
     matrix.set_index('id', inplace=True)
     matrix.to_csv(output_file)
 
