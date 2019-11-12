@@ -1,89 +1,8 @@
 import os
-import re
 import zipfile
 import json
 from datetime import datetime as dt
 import datetime
-import pandas as pd
-
-
-def log_tweep_error(logger, tweep_error, message=""):
-    """Log a TweepError exception."""
-    if tweep_error.api_code:
-        api_code = tweep_error.api_code
-    else:
-        api_code = int(re.findall(r'"code":[0-9]+', tweep_error.reason)[0].split(':')[1])
-    if api_code == 32:
-        logger.error("invalid Twitter API authentication tokens")
-    elif api_code == 34:
-        logger.error("requested object (user, Tweet, etc) not found")
-    elif api_code == 64:
-        logger.error("your Twitter developer account is suspended and is not permitted")
-    elif api_code == 130:
-        logger.error("Twitter is currently in over capacity")
-    elif api_code == 131:
-        logger.error("internal Twitter error occurred")
-    elif api_code == 135:
-        logger.error("could not authenticate your Twitter API tokens")
-    elif api_code == 136:
-        logger.error("you have been blocked to perform this action")
-    elif api_code == 179:
-        logger.error("you are not authorized to see this Tweet")
-    else:
-        if message:
-            logger.error("error while using the Twitter REST API: %s. Message = %s", tweep_error, message)
-        else:
-            logger.error("error while using the Twitter REST API: %s", tweep_error)
-
-
-def flatten_json(y):
-    """
-    Method to convert the multilayer JSON to 1 dimention row vector
-    :return: flattern json dictionary
-    """
-    out = {}
-
-    def flatten(x, name=''):
-        if type(x) is dict:
-            for a in x:
-                flatten(x[a], name + a + '_')
-        else:
-            out[name[:-1]] = x
-
-    # Recursively call itself with the child dictionary
-    flatten(y)
-    return out
-
-
-def generate_state_dictionary():
-    """
-    The function that reads uscities.csv file which contains the information about the city, county, state id and state
-    names and returns a hash map object where key is state name and values is a set of cities and counties in
-    the state
-    :return: Returns a hash map object where key is state name and values is a set of cities and counties in
-             the state
-    """
-    path_to_location_file = os.getcwd() + "/Data/uscities.csv"
-    df = pd.read_csv(path_to_location_file)
-    state_locations = {}
-
-    for index, row in df.iterrows():
-        state_name = re.sub(r"[^a-zA-Z]+", ' ', row[3]).lower()
-        if state_name not in state_locations:
-            state_locations[state_name] = set()
-
-            # Adding state ID to the dictionary
-            state_locations[state_name].add(re.sub(r"[^a-zA-Z]+", ' ', row[2]).lower())
-
-        # Adding city name to the dictionary
-        if row[0]:
-            state_locations[state_name].add(re.sub(r"[^a-zA-Z]+", ' ', row[0]).lower())
-
-        # Adding county name to the dictionary
-        if row[5]:
-            state_locations[state_name].add(re.sub(r"[^a-zA-Z]+", ' ', row[5]).lower())
-
-    return state_locations
 
 
 def get_user_description_dict(input_file):
@@ -200,7 +119,7 @@ def reconstruct_data_dictionary(input_file_folder_path, number_of_users, end_dat
     return users_profiles
 
 
-def reconstruct_data(input_file_folder_path, output_file_path, number_of_users, end_date=dt.strftime(dt.now(), '%Y_%m_%d')):
+def reconstruct_longitudinal_data(input_file_folder_path, output_file_path, number_of_users, end_date=dt.strftime(dt.now(), '%Y_%m_%d')):
     """
     This function calls the reconstruct_data_dictionary function to get the updated user profiles dictionary and
     store it as a zip file in the user specified location.

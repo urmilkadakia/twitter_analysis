@@ -1,14 +1,14 @@
 import argparse
 import os
-from twitter_scraper import TwitterScraper
-from ngram_methods import daily_ngram_collector, changing_ngram, ngram_frequency_dist, ngram_histogram, \
+from tweepy_methods import twitter_scarper, get_twitter_user_id_from_screen_name
+from analysis_methods import daily_ngram_collector, changing_ngram, ngram_frequency_dist, ngram_histogram, \
     char_length_histogram, ngram_adjacency_matrix, ngram_alloy_matrix, ngram_transmutation_matrix, \
-    ngram_document_term_matrix, calculate_present_absent
+    ngram_document_term_matrix, calculate_present_absent, get_locations, entities_count_difference, \
+    description_change_frequency
 
-from account_methods import get_locations, bot_or_not, entities_count_difference, description_change_frequency, \
-    get_twitter_user_id_from_screen_name
+from botometer_methods import bot_or_not
 
-from util import reconstruct_data
+from reconstruction_methods import reconstruct_longitudinal_data
 
 
 def is_valid_path(parser, arg):
@@ -47,16 +47,20 @@ def main():
                                              "False.", default=False, type=bool)
     twitter_scraper_parser.set_defaults(function=call_twitter_scraper)
 
-    # Sub-parsers for twitter_scraper
-    reconstruct_data_parser = subparsers.add_parser('reconstruct_data')
-    reconstruct_data_parser.add_argument("-i", dest="input_file", required=True,
-                                         help="Path to input file", type=lambda x: is_valid_path(parser, x))
-    reconstruct_data_parser.add_argument("-o", dest="output_file", required=False,
-                                         help="Path to output file")
-    reconstruct_data_parser.add_argument("-num_users", dest="number_of_users", required=True,
-                                         help="To identify the input file as they are named based on the "
-                                              "number of users", type=int)
-    reconstruct_data_parser.set_defaults(function=call_reconstruct_data)
+    # Sub-parsers for reconstruct_longitudinal_data
+    reconstruct_longitudinal_data_parser = subparsers.add_parser('reconstruct_longitudinal_data')
+    reconstruct_longitudinal_data_parser.add_argument("-i", dest="input_file", required=True,
+                                                      help="Path to input file", type=lambda x: is_valid_path(parser, x))
+    reconstruct_longitudinal_data_parser.add_argument("-o", dest="output_file", required=False,
+                                                      help="Path to output file")
+    reconstruct_longitudinal_data_parser.add_argument("-num_users", dest="number_of_users", required=True,
+                                                      help="To identify the input file as they are named based on the "
+                                                           "number of users", type=int)
+    reconstruct_longitudinal_data_parser.add_argument("-end", dest="end_date", required=True,
+                                                      help="Date up to which the function will reconstruct data. "
+                                                           "Default is today.", type=str)
+
+    reconstruct_longitudinal_data_parser.set_defaults(function=call_reconstruct_longitudinal_data)
 
     # Sub-parsers for ngram_frequency_dist
     ngram_frequency_dist_parser = subparsers.add_parser('ngram_frequency_dist')
@@ -305,12 +309,11 @@ def main():
 
 
 def call_twitter_scraper(args):
-    twitter_scraper_object = TwitterScraper(args.input_file, args.output_file)
-    twitter_scraper_object.generate_file(args.format, args.size_flag, args.clean_userid_flag)
+    twitter_scarper(args.input_file, args.output_file, args.format, args.size_flag, args.clean_userid_flag)
 
 
-def call_reconstruct_data(args):
-    reconstruct_data(args.input_file, args.output_file, args.number_of_users)
+def call_reconstruct_longitudinal_data(args):
+    reconstruct_longitudinal_data(args.input_file, args.output_file, args.number_of_users)
 
 
 def call_ngram_frequency_dist(args):

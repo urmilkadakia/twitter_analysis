@@ -55,7 +55,7 @@ save the file.
 
 
 ## Usage
-1. **twitter_scraper.generate_file(input_file, output_file, format, 
+1. **tweepy_methods.twitter_scraper(input_file, output_file, format, 
 size, clean_userid)**
     - Method to send the api calls to twitter and get the user data in 
     the json format. The method stores all the data in the user 
@@ -70,18 +70,17 @@ size, clean_userid)**
         - clean_userid: A flag to store the list of user ids for which 
         we get the data without any error. Pass True to store the list 
         as csv file
-2. **twitter_scraper.reconstruct_data(input_file, output_file, 
-number_of_users)**
-    - This function calls the reconstruct_data_dictionary function to 
-    get the updated user profiles dictionary and store it as a zip file 
-    in the user specified location.
+
+2. **twitter_methods.get_twitter_user_id_from_screen_name(
+input_file_path, output_file_path)**
+    - Method to get the twitter user_id from the screen name
     - **Parameters**:
-        - **input_file**: Path to the input file
-        - **output_file**: Path to the output file
-        - **number_of_users**: To identify the input file as they are 
-        named based on the number of users
-     
-3. **ngram_methods.count_ngram_frequency(input_file, ngram, 
+        - **input_file_path**: path to input file that contains the 
+        list of screen name
+        - **output_file_path**: path to the output file where the 
+        corresponding the user_ids are saved
+
+3. **analysis_methods.count_ngram_frequency(input_file, ngram, 
 alpha_numeric_flag, stop_words_flag)**
     - The function will count the frequencies for the given ngram
     - **Parameters**:
@@ -96,7 +95,7 @@ alpha_numeric_flag, stop_words_flag)**
     - return: Returns the dictionary of ngram and frequency as the key 
     value pairs sorted in the decreasing order.  
     
-4. **ngram_methods.ngram_frequency_dist(input_file, output_file, ngram, 
+4. **analysis_methods.ngram_frequency_dist(input_file, output_file, ngram, 
 alpha_numeric_flag, stop_words_flag)**
     - The function counts the frequency of each ngram specified by the 
     input parameter ngram and store the output as the csv at the output 
@@ -112,7 +111,7 @@ alpha_numeric_flag, stop_words_flag)**
         - **stop_words_flag**: Filter all stop words. Default value is 
         False.
 
-5. **ngram_methods.changing_ngram(input_file1, input_file2, output_file, 
+5. **analysis_methods.changing_ngram(input_file1, input_file2, output_file, 
 ngram, alpha_numeric_flag, stop_words_flag)**
      - The function counts the difference between the frequencies of 
      the two given files for the specified ngram and store it in the 
@@ -129,7 +128,7 @@ ngram, alpha_numeric_flag, stop_words_flag)**
         - **stop_words_flag**: Filter all stop words. Default value is 
         False.
 
-6. **ngram_methods.daily_ngram_collector(input_file, output_file, 
+6. **analysis_methods.daily_ngram_collector(input_file, output_file, 
 start_date, end_date, ngram, cutoff_freq, alpha_numeric_flag, 
 stop_words_flag)**
      - The function reads all the files that are in the input file 
@@ -154,14 +153,14 @@ stop_words_flag)**
         - **stop_words_flag**: Filter all stop words. Default value is 
         False.
        
-7. **ngram_methods.char_length_histogram(input_file, output_file)**
+7. **analysis_methods.char_length_histogram(input_file, output_file)**
      - The function to plot and store the histogram of the character 
      length description of each user in the file
      - **Parameters**:
         - **input_file**: Path to the input file
         - **output_file**: Path to the output file
         
-8. **ngram_methods.ngram_histogram(input_file, output_file, ngram, 
+8. **analysis_methods.ngram_histogram(input_file, output_file, ngram, 
 cutoff_freq, alpha_numeric_flag, stop_words_flag)**
      - The function to plot and store the histogram of the specified 
      ngram and their frequencies for the ngrams which has frequency 
@@ -180,7 +179,7 @@ cutoff_freq, alpha_numeric_flag, stop_words_flag)**
         - **stop_words_flag**: Filter all stop words. Default value is 
         False.
         
-9. **ngram_methods.ngram_adjacency_matrix(input_file, output_file, ngram, 
+9. **analysis_methods.ngram_adjacency_matrix(input_file, output_file, ngram, 
 cutoff_freq, alpha_numeric_flag, stop_words_flag)**
     - The function writes the adjacency matrix to the output file, 
     where the rows and columns are ngram and each cell is the number of 
@@ -199,7 +198,7 @@ cutoff_freq, alpha_numeric_flag, stop_words_flag)**
         - **stop_words_flag**: Filter all stop words. Default value is 
         False.
         
-10. **ngram_methods.ngram_alloy_matrix(input_file1, input_file2, 
+10. **analysis_methods.ngram_alloy_matrix(input_file1, input_file2, 
 output_file, ngram, cutoff_freq, alpha_numeric_flag, stop_words_flag)**
      - Alloy matrix count the number of new ngram pairings. If a ngram A 
      is present at time 1 and at time 2. If a ngram B is not present at 
@@ -220,7 +219,7 @@ output_file, ngram, cutoff_freq, alpha_numeric_flag, stop_words_flag)**
         - **stop_words_flag**: Filter all stop words. Default value is 
         False.
         
-11. **ngram_methods.ngram_transmutation_matrix(input_file1, input_file2, 
+11. **analysis_methods.ngram_transmutation_matrix(input_file1, input_file2, 
 output_file, ngram, cutoff_freq, alpha_numeric_flag, stop_words_flag)**
     - Alloy matrix count the number of new ngram pairings. If a ngram A 
     is present at time 1 but not at time 2. If a ngram B is not present 
@@ -241,7 +240,7 @@ output_file, ngram, cutoff_freq, alpha_numeric_flag, stop_words_flag)**
         - **stop_words_flag**: Filter all stop words. Default value is 
         False.
         
-12. **ngram_document_term_matrix(input_file1, word_list_file, 
+12. **analysis_methods.ngram_document_term_matrix(input_file1, word_list_file, 
 output_file, ngram, cutoff_freq, alpha_numeric_flag, stop_words_flag)**
     - The function writes the adjacency matrix to the output file, 
     where the rows and columns are ngram and each cell is the number of 
@@ -262,7 +261,7 @@ output_file, ngram, cutoff_freq, alpha_numeric_flag, stop_words_flag)**
         - **stop_words_flag**: Filter all stop words. Default value is 
         False.
 
-13. **ngram_methods.calculate_present_absent(input_file, output_file, 
+13. **analysis_methods.calculate_present_absent(input_file, output_file, 
 number_of_users, start_date, end_date, pattern)**
     - This function calculates the number of times the twitter user has 
     added ot removed the pattern defined here in his/her description.
@@ -276,15 +275,8 @@ number_of_users, start_date, end_date, pattern)**
         calculate
         - **end_date**: Date up to which function will calculate
         - **pattern**: Pattern to search for in the description
-    
-14. **account_methods.bot_or_not(input_file, output_file)**
-    - This function creates a file which contains the Botometer scores 
-    for each user in the input_file
-    - **Parameters**:
-        - **input_file**: Path to the input file
-        - **output_file**: Path to the output file
 
-15. **account_methods.get_locations(input_file, output_file)**
+14. **analysis_methods.get_locations(input_file, output_file)**
      - The function writes the user id and his/her us state name in the 
      output file based on the the value of location key in the user 
      information and state_location dictionary. If function does not 
@@ -294,7 +286,7 @@ number_of_users, start_date, end_date, pattern)**
         - **input_file**: Path to the input file
         - **output_file**: Path to the output file
 
-16. **account_methods.entities_count_difference(input_file1, 
+15. **analysis_methods.entities_count_difference(input_file1, 
 input_file2, output_file)**
      - The function calculates the difference between the followers 
      count, following count, total tweets and total likes of each user 
@@ -307,7 +299,7 @@ input_file2, output_file)**
        (later date)
         - **output_file**: Path to the output file
 
-17. **account_methods.description_change_frequency(input_file, 
+16. **analysis_methods.description_change_frequency(input_file, 
 output_file, number_of_users, start_date, end_date)**
      - The function calculates and store the number of times the user 
      has made changes in his/her description between the start_date 
@@ -321,6 +313,72 @@ output_file, number_of_users, start_date, end_date)**
         - **start_date**: Date from which function will start to 
         calculate
         - **end_date**: Date up to which function will calculate
+
+17. **botometer_methods.bot_or_not(input_file, output_file)**
+    - This function creates a file which contains the Botometer scores 
+    for each user in the input_file
+    - **Parameters**:
+        - **input_file**: Path to the input file
+        - **output_file**: Path to the output file
+      
+18. **reconstruction_methods.get_user_description_dict(input_file)**
+    - The method read the json file and generates dictionary where each 
+    key is user id and corresponding value is his/her profile 
+    description.
+    - **Parameters**:
+        - **input_file**: path to input file
+    - **return**: Return a dictionary where user id is key and his/her 
+    description is its value.      
+
+19. **reconstruction_methods.reconstruct_user_description_dictionary(
+input_file_folder_path, number_of_users, end_date)**
+    - This function will reconstruct the a dictionary, where keys are user 
+    ids and values are corresponding profile descriptions. It uses the 
+    1st day of the month as the base file and updates/adds the user 
+    descriptions that have made changes in their descriptions.
+    - **Parameters**:
+        - **input_file_folder_path**: Path to the folder in which input 
+        files are stored
+        - **output_file**: Path to the output file
+        - **number_of_users**: To identify the input file as they are 
+        named based on the number of users
+        - **end_date**: Date up to which the function will reconstruct 
+        data. Default is today.
+
+20. **reconstruction_methods.get_user_profile_dict(input_file)**
+    - The method read the json file and returns a dictionary where each key 
+    is user id and corresponding value is his/her profile data.
+    - **Parameters**:
+        - **input_file**: Path to input file
+
+21. **reconstruction_methods.reconstruct_data_dictionary(
+input_file_folder_path, number_of_users, end_date)**
+    - This function will reconstruct the a dictionary, where keys are 
+    user ids and values are corresponding profile data. It uses the 1st 
+    day of the month as the base file and updates/adds the user profiles 
+    that have made changes in their descriptions.
+    - **Parameters**:
+        - **input_file_folder_path**: Path to the folder in which input 
+        files are stored
+        - **output_file**: Path to the output file
+        - **number_of_users**: To identify the input file as they are 
+        named based on the number of users
+        - **end_date**: Date up to which the function will reconstruct 
+        data. Default is today.
+
+22. **reconstruction_methods.reconstruct_longitudinal_data(
+input_file_folder_path, output_file_path, number_of_users, end_date)**
+    - This function calls the reconstruct_data_dictionary function to 
+    get the updated user profiles dictionary and store it as a zip file 
+    in the user specified location.
+    - **Parameters**:
+        - **input_file_folder_path**: Path to the folder in which input 
+        files are stored
+        - **output_file**: Path to the output file
+        - **number_of_users**: To identify the input file as they are 
+        named based on the number of users
+        - **end_date**: Date up to which the function will reconstruct 
+        data. Default is today.        
 
 ## Example
 - Use the following command to run any function on terminal:

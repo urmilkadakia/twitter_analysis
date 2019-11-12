@@ -15,7 +15,7 @@ from datetime import datetime as dt
 import datetime
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from util import get_user_description_dict, reconstruct_user_description_dictionary
+from reconstruction_methods import get_user_description_dict, reconstruct_user_description_dictionary, get_user_profile_dict
 
 mpl.use('Agg')
 nltk.download('punkt')
@@ -23,7 +23,7 @@ nltk.download('stopwords')
 STOP_WORDS = set(stopwords.words('english'))
 
 
-def get_ngram_list(text, n=1, alpha_numeric_flag=False, stop_words_flag=False):
+def _get_ngram_list(text, n=1, alpha_numeric_flag=False, stop_words_flag=False):
     """
     Returns the a list of ngram for the input text for the specified ngram type
     :param text: input text
@@ -55,7 +55,7 @@ def get_ngram_list(text, n=1, alpha_numeric_flag=False, stop_words_flag=False):
     return ngram_list
 
 
-def count_ngrams_frequency(input_file, n=1, alpha_numeric_flag=False, stop_words_flag=False):
+def count_ngram_frequency(input_file, n=1, alpha_numeric_flag=False, stop_words_flag=False):
     """
     The function will count the frequencies for the given ngram
     :param input_file: Path to the input file
@@ -74,7 +74,7 @@ def count_ngrams_frequency(input_file, n=1, alpha_numeric_flag=False, stop_words
     for user in json_list:
         text += user['description'] + " "
 
-    ngrams_list = get_ngram_list(text, n, alpha_numeric_flag, stop_words_flag)
+    ngrams_list = _get_ngram_list(text, n, alpha_numeric_flag, stop_words_flag)
     # Get the frequency of each ngram in our corpus
     ngram_freq = collections.Counter(ngrams_list)
     return ngram_freq
@@ -91,7 +91,7 @@ def ngram_frequency_dist(input_file, output_file, n=1, alpha_numeric_flag=False,
     :param alpha_numeric_flag: filter all non alpha numeric words. Default is false.
     :param stop_words_flag: filter all stop words. Default is false.
     """
-    ngram_freq = count_ngrams_frequency(input_file, n, alpha_numeric_flag, stop_words_flag)
+    ngram_freq = count_ngram_frequency(input_file, n, alpha_numeric_flag, stop_words_flag)
     ngram_freq = ngram_freq.most_common()
 
     with open(output_file, "w+") as csvfile:
@@ -113,9 +113,9 @@ def changing_ngram(input_file1, input_file2,  output_file, n=1, alpha_numeric_fl
     :param stop_words_flag: filter all stop words. Default is false.
     """
 
-    ngram_freq1 = count_ngrams_frequency(input_file1, n, alpha_numeric_flag, stop_words_flag)
+    ngram_freq1 = count_ngram_frequency(input_file1, n, alpha_numeric_flag, stop_words_flag)
     ngram_freq1 = collections.OrderedDict(sorted(ngram_freq1.items()))
-    ngram_freq2 = count_ngrams_frequency(input_file2, n, alpha_numeric_flag, stop_words_flag)
+    ngram_freq2 = count_ngram_frequency(input_file2, n, alpha_numeric_flag, stop_words_flag)
     ngram_freq2 = collections.OrderedDict(sorted(ngram_freq2.items()))
 
     ngram_freq = {}
@@ -165,7 +165,7 @@ def daily_ngram_collector(input_file_folder_path, output_file, number_of_users, 
     while curr_date != end_date:
         input_f = os.path.join(input_file_folder_path, curr_date + '_profiles_' + str(number_of_users) + '.zip')
         if os.path.exists(input_f):
-            ngram_freq = count_ngrams_frequency(input_f, n, alpha_numeric_flag, stop_words_flag)
+            ngram_freq = count_ngram_frequency(input_f, n, alpha_numeric_flag, stop_words_flag)
             ngram_freq = ngram_freq.most_common()
 
             # Creating the new row to add to the daily collector file
@@ -238,7 +238,7 @@ def ngram_histogram(input_file, output_file, n=1, cutoff_freq=5, alpha_numeric_f
     :param alpha_numeric_flag: filter all non alpha numeric words. Default is false.
     :param stop_words_flag: filter all stop words. Default is false.
     """
-    ngram_freq = count_ngrams_frequency(input_file, n, alpha_numeric_flag, stop_words_flag)
+    ngram_freq = count_ngram_frequency(input_file, n, alpha_numeric_flag, stop_words_flag)
     ngram_freq = ngram_freq.most_common()
 
     xdata = []
@@ -279,7 +279,7 @@ def ngram_adjacency_matrix(input_file, output_file, n=1, cut_off=5, alpha_numeri
     :param alpha_numeric_flag: filter all non alpha numeric words. Default is false.
     :param stop_words_flag: filter all stop words. Default is false.
     """
-    ngram_freq = count_ngrams_frequency(input_file, n, alpha_numeric_flag, stop_words_flag)
+    ngram_freq = count_ngram_frequency(input_file, n, alpha_numeric_flag, stop_words_flag)
 
     for ngram in list(ngram_freq):
         if ngram_freq[ngram] < cut_off:
@@ -295,7 +295,7 @@ def ngram_adjacency_matrix(input_file, output_file, n=1, cut_off=5, alpha_numeri
     for user in json_list:
         text = user['description']
 
-        ngram_list = get_ngram_list(text, n, alpha_numeric_flag, stop_words_flag)
+        ngram_list = _get_ngram_list(text, n, alpha_numeric_flag, stop_words_flag)
         for i in ngram_list:
             for j in ngram_list:
                 try:
@@ -344,7 +344,7 @@ def ngram_alloy_matrix(input_file1, input_file2, output_file, n=1, alpha_numeric
     for user in json_list:
         text += user['description'] + ' '
 
-    ngram_set1 = set(get_ngram_list(text, n, alpha_numeric_flag, stop_words_flag))
+    ngram_set1 = set(_get_ngram_list(text, n, alpha_numeric_flag, stop_words_flag))
 
     with zipfile.ZipFile(input_file2, 'r') as z:
         for filename in z.namelist():
@@ -355,7 +355,7 @@ def ngram_alloy_matrix(input_file1, input_file2, output_file, n=1, alpha_numeric
     for user in json_list:
         text += user['description'] + ' '
 
-    ngram_set2 = set(get_ngram_list(text, n, alpha_numeric_flag, stop_words_flag))
+    ngram_set2 = set(_get_ngram_list(text, n, alpha_numeric_flag, stop_words_flag))
     ngram_set_combine = ngram_set1.copy()
     ngram_set_combine.update(ngram_set2)
 
@@ -367,8 +367,8 @@ def ngram_alloy_matrix(input_file1, input_file2, output_file, n=1, alpha_numeric
 
     for user in user_description1:
         if user in user_description2:
-            user_ngram_list1 = get_ngram_list(user_description1[user], n, alpha_numeric_flag, stop_words_flag)
-            user_ngram_list2 = get_ngram_list(user_description2[user], n, alpha_numeric_flag, stop_words_flag)
+            user_ngram_list1 = _get_ngram_list(user_description1[user], n, alpha_numeric_flag, stop_words_flag)
+            user_ngram_list2 = _get_ngram_list(user_description2[user], n, alpha_numeric_flag, stop_words_flag)
             for ngram2 in user_ngram_list2:
                 if ngram2 not in user_ngram_list1:
                     for ngram1 in user_ngram_list1:
@@ -417,7 +417,7 @@ def ngram_transmutation_matrix(input_file1, input_file2, output_file, n=1, alpha
     for user in json_list:
         text += user['description'] + ' '
 
-    ngram_set1 = set(get_ngram_list(text, n, alpha_numeric_flag, stop_words_flag))
+    ngram_set1 = set(_get_ngram_list(text, n, alpha_numeric_flag, stop_words_flag))
 
     with zipfile.ZipFile(input_file2, 'r') as z:
         for filename in z.namelist():
@@ -428,7 +428,7 @@ def ngram_transmutation_matrix(input_file1, input_file2, output_file, n=1, alpha
     for user in json_list:
         text += user['description'] + ' '
 
-    ngram_set2 = set(get_ngram_list(text, n, alpha_numeric_flag, stop_words_flag))
+    ngram_set2 = set(_get_ngram_list(text, n, alpha_numeric_flag, stop_words_flag))
     ngram_set_combine = ngram_set1.copy()
     ngram_set_combine.update(ngram_set2)
 
@@ -440,8 +440,8 @@ def ngram_transmutation_matrix(input_file1, input_file2, output_file, n=1, alpha
 
     for user in user_description1:
         if user in user_description2:
-            user_ngram_list1 = get_ngram_list(user_description1[user], n, alpha_numeric_flag, stop_words_flag)
-            user_ngram_list2 = get_ngram_list(user_description2[user], n, alpha_numeric_flag, stop_words_flag)
+            user_ngram_list1 = _get_ngram_list(user_description1[user], n, alpha_numeric_flag, stop_words_flag)
+            user_ngram_list2 = _get_ngram_list(user_description2[user], n, alpha_numeric_flag, stop_words_flag)
             ngram_difference = [ngram for ngram in user_ngram_list1 + user_ngram_list2
                                 if ngram not in user_ngram_list1 or ngram not in user_ngram_list2]
             for i in range(len(ngram_difference)):
@@ -497,7 +497,7 @@ def ngram_document_term_matrix(input_file, word_list_file, output_file, n=1, alp
     for user in json_list:
         text = user['description']
 
-        ngram_list = get_ngram_list(text, n, alpha_numeric_flag, stop_words_flag)
+        ngram_list = _get_ngram_list(text, n, alpha_numeric_flag, stop_words_flag)
         for word in ngram_list:
             if n == 1:
                 if word[0] in word_list:
@@ -601,3 +601,190 @@ def calculate_present_absent(input_file_folder_path, output_file, number_of_user
 
     matrix.set_index(columns[0], inplace=True)
     matrix.to_csv(output_file)
+
+
+def _generate_state_dictionary():
+    """
+    The function that reads uscities.csv file which contains the information about the city, county, state id and state
+    names and returns a hash map object where key is state name and values is a set of cities and counties in
+    the state
+    :return: Returns a hash map object where key is state name and values is a set of cities and counties in
+             the state
+    """
+    path_to_location_file = os.getcwd() + "/Data/uscities.csv"
+    df = pd.read_csv(path_to_location_file)
+    state_locations = {}
+
+    for index, row in df.iterrows():
+        state_name = re.sub(r"[^a-zA-Z]+", ' ', row[3]).lower()
+        if state_name not in state_locations:
+            state_locations[state_name] = set()
+
+            # Adding state ID to the dictionary
+            state_locations[state_name].add(re.sub(r"[^a-zA-Z]+", ' ', row[2]).lower())
+
+        # Adding city name to the dictionary
+        if row[0]:
+            state_locations[state_name].add(re.sub(r"[^a-zA-Z]+", ' ', row[0]).lower())
+
+        # Adding county name to the dictionary
+        if row[5]:
+            state_locations[state_name].add(re.sub(r"[^a-zA-Z]+", ' ', row[5]).lower())
+
+    return state_locations
+
+
+def get_locations(input_file, output_file):
+    """
+    The function writes the user id and his/her us state name in the output file based on the the value of location key
+    in the user information and state_locations mapping. If function does not find the location in the state_locations
+    mapping then N/A will be written against the user id.
+    :param input_file: Path to input file
+    :param output_file: Path to output file
+    """
+    with zipfile.ZipFile(input_file, 'r') as z:
+        for filename in z.namelist():
+            with z.open(filename) as f:
+                json_list = json.load(f)
+
+    state_locations = _generate_state_dictionary()
+    location_dict = {}
+    for item in json_list:
+        location_dict[item['id']] = re.split(r'[`\-=~!@#$%^&*()_+\[\]{};\'\\:"|<,./<>?]', item['location'].lower())
+    state_flag = 0
+    us_flag = 0
+    cnt = 0
+    for user_id in location_dict:
+        for item in location_dict[user_id]:
+            for state in state_locations:
+                if item == state:
+                    location_dict[user_id] = state
+                    state_flag = 1
+                    break
+            if state_flag == 1:
+                break
+        if state_flag == 0:
+            for item in location_dict[user_id]:
+                for state in state_locations:
+                    if item.strip() in state_locations[state]:
+                        location_dict[user_id] = state
+                        state_flag = 1
+                        break
+                if state_flag == 1:
+                    break
+        if state_flag == 1:
+            state_flag = 0
+        else:
+            for item in location_dict[user_id]:
+                if item.strip() == 'us' or item.strip() == 'usa' or item.strip() == 'united states':
+                    location_dict[user_id] = 'usa'
+                    us_flag = 1
+                    break
+            if us_flag == 1:
+                us_flag = 0
+            else:
+                location_dict[user_id] = 'N/A'
+                cnt += 1
+
+    with open(output_file, 'w') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(['user_id', 'location'])
+        for data in location_dict:
+            writer.writerow([data, location_dict[data]])
+
+
+def entities_count_difference(input_file1, input_file2, output_file):
+    """
+    The function calculates the difference between the followers count, following count, total tweets and total likes
+    of each user between the two input files that  are generate at two different time
+    :param input_file1: Path to user profiles file of a specific date (earlier date)
+    :param input_file2: Path to user profiles file of a specific date (later date)
+    :param output_file: Path to output file
+    """
+
+    user_profiles_1 = get_user_profile_dict(input_file1)
+    user_profiles_2 = get_user_profile_dict(input_file2)
+
+    entity_count_difference = pd.DataFrame(columns=['user_id', 'tweet_diff', 'follower_diff', 'following_diff',
+                                                    'like_diff'], index=None)
+
+    for user in user_profiles_1:
+        if user in user_profiles_2:
+            tweet_diff = user_profiles_2[user]['statuses_count'] - user_profiles_1[user]['statuses_count']
+            follower_diff = user_profiles_2[user]['followers_count'] - user_profiles_1[user]['followers_count']
+            following_diff = user_profiles_2[user]['friends_count'] - user_profiles_1[user]['friends_count']
+            like_diff = user_profiles_2[user]['favourites_count'] - user_profiles_1[user]['favourites_count']
+
+            entity_count_difference.loc[user] = [user, tweet_diff, follower_diff, following_diff, like_diff]
+
+    # Setting the user_id as the index
+    entity_count_difference.set_index(['user_id'], inplace=True)
+
+    entity_count_difference.to_csv(output_file)
+
+
+def description_change_frequency(input_file_folder_path, output_file, number_of_users, start_date, end_date):
+    """
+    The function calculates and store the number of times the user has made changes in his/her description.
+    :param input_file_folder_path: Path where all the daily user profiles are stored
+    :param output_file: Path to output file
+    :param number_of_users: To identify the input file as they are named based on the number of users
+    :param start_date: Date from which function will start to count the change
+    :param end_date: Date up to which function will count the change
+    """
+
+    base_flag = 1
+    base_continue_flag = 0
+    user_change_freq = {}
+    curr_date = start_date
+
+    end_date = dt.strptime(end_date, '%Y_%m_%d')
+    end_date += datetime.timedelta(days=1)
+    end_date = dt.strftime(end_date, '%Y_%m_%d')
+
+    while curr_date != end_date:
+        input_f = os.path.join(input_file_folder_path, curr_date + '_profiles_' + str(number_of_users) + '.zip')
+        if os.path.exists(input_f):
+            with zipfile.ZipFile(input_f, 'r') as z:
+                for filename in z.namelist():
+                    with z.open(filename) as f:
+                        if base_flag:
+                            base_json_list = json.load(f)
+                            base_flag = 0
+                            base_continue_flag = 1
+                        else:
+                            compare_json_list = json.load(f)
+                if base_continue_flag == 1:
+                    base_continue_flag = 0
+                    continue
+
+            # Generating dictionaries to compare the user description between two time stamps
+            # Key is user id and value is the description of user
+            base_description = {}
+            for user in base_json_list:
+                base_description[user['id']] = user['description']
+
+            compare_description = {}
+            for user in compare_json_list:
+                compare_description[user['id']] = user['description']
+
+            # Checking user has change its description or not if yes replace base case with new description for to capture
+            # Future changes and increment the user change frequency by 1
+            for user_id in base_description:
+                if user_id in compare_description:
+                    if user_id not in user_change_freq:
+                        user_change_freq[user_id] = 0
+                    if base_description[user_id] != compare_description[user_id]:
+                        base_description[user_id] = compare_description[user_id]
+                        user_change_freq[user_id] += 1
+
+        curr_date = dt.strptime(curr_date, '%Y_%m_%d')
+        curr_date += datetime.timedelta(days=1)
+        curr_date = dt.strftime(curr_date, '%Y_%m_%d')
+
+    # Store the user change frequency dictionary as a csv file
+    with open(output_file, "w+") as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(['user_id', 'change_frequency'])
+        for key, value in user_change_freq.items():
+            writer.writerow([key, value])
