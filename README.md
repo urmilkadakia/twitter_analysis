@@ -14,11 +14,8 @@ If you want to use an **existing app** select one or click on
 **Create an app**.
 - Fill the application form and click on **Create**.
 
-### installing Tweepy
+### Tweepy
 - **Tweepy** is a wrapper around the Twitter Rest API.
-- Install using pip run: `pip install tweepy`
-- Install using anaconda Cloud run: 
-` conda install -c conda-forge tweepy`
 - For more information on tweepy visit: [Tweepy Documentation](https://tweepy.readthedocs.io/en/3.7.0/index.html#).
 
 ### Botometer
@@ -27,14 +24,7 @@ score based on how likely the account is to be a bot. Higher scores
 are more bot-like. 
 - For more information regarding the botometer score please visit: 
 [botometer](https://botometer.iuni.iu.edu/#!/)
-- **Instaling Botometer**
-```
-pip install botometer
-```
-- **Python dependencies**:
-    - **tweepy** install as mentioned above.
-    - **requests** install using the following command: 
-    `pip install requests`.
+
 
 ### Mashape Market API key
 - Botometer runs on the Mashape server, so to use botomerter you must 
@@ -53,6 +43,11 @@ Mashape key for the botometer.
 - Copy and paste the keys and tokens to the respective variables and 
 save the file.
 
+### Downloading and installing dependencies
+- To download and install dependencies run the following command:
+    ```
+    sh install.sh
+    ```
 
 ## Usage
 1. **tweepy_methods.twitter_scraper(input_file, output_file, format, 
@@ -382,21 +377,21 @@ input_file_folder_path, output_file_path, number_of_users, end_date)**
 
 ## Example
 - Use the following command to run any function on terminal:
-```
-python Driver.py <function name> <args>
-```
+    ```
+    python Driver.py <function name> <args>
+    ```
 - Pass `-h` as argument for help menu.
 - In similar fashion one can run any other function. To get help 
 regarding the function specific arguments run:
-```
-python Driver.py <function name> -h
-```
+    ```
+    python Driver.py <function name> -h
+    ```
 - For example, to run the **ngram_frequency_dist** with ngram of size 2,
 with alpha_numeric_flag and stop_words_flag as True, run the following 
 command:
-```
-python Driver.py ngram_frequency_dist -i <input file> -o <output file> -ngram 2 -alpha_numeric True -stop_words True
-``` 
+    ```
+    python Driver.py ngram_frequency_dist -i <input file> -o <output file> -ngram 2 -alpha_numeric True -stop_words True
+    ``` 
 
 ## Logs
 - All the errors, exceptions and information status generated 

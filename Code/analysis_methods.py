@@ -18,8 +18,6 @@ import matplotlib.pyplot as plt
 from reconstruction_methods import get_user_description_dict, reconstruct_user_description_dictionary, get_user_profile_dict
 
 mpl.use('Agg')
-nltk.download('punkt')
-nltk.download('stopwords')
 STOP_WORDS = set(stopwords.words('english'))
 
 
