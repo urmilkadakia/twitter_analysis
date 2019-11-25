@@ -1,13 +1,12 @@
-import argparse
 import os
+import argparse
+
 from tweepy_methods import twitter_scarper, get_twitter_user_id_from_screen_name
 from analysis_methods import daily_ngram_collector, changing_ngram, ngram_frequency_dist, ngram_histogram, \
     char_length_histogram, ngram_adjacency_matrix, ngram_alloy_matrix, ngram_transmutation_matrix, \
     ngram_document_term_matrix, calculate_present_absent, get_locations, entities_count_difference, \
     description_change_frequency
-
 from botometer_methods import bot_or_not
-
 from reconstruction_methods import reconstruct_longitudinal_data
 
 

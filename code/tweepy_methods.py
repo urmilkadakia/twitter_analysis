@@ -1,20 +1,20 @@
 import tweepy
 import json
-import api_keys
 import csv
 import time
-from datetime import datetime as dt
 import zipfile
 import os
 import logging
+from datetime import datetime as dt
+
+from api_keys import access_token, access_token_secret, api_key, api_secret_key, mashape_key
 from reconstruction_methods import reconstruct_data_dictionary
 from logger import log_twitter_error
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-filename = os.getcwd() + '/Logs/tweepy_methods_' + dt.now().strftime("%m_%Y") + '.log'
-
+filename = os.path.join(os.getcwd(), 'logs/tweepy_methods_' + dt.now().strftime("%m_%Y") + '.log')
 if not os.path.exists(filename):
     open(filename, 'w+').close()
 
@@ -28,8 +28,8 @@ logger.addHandler(file_handler)
 
 def _flatten_json(y):
     """
-    Method to convert the multilayer JSON to 1 dimention row vector
-    :return: flattern json dictionary
+    Method to convert the multilayer JSON to 1 dimension row vector
+    :return: flatten json dictionary
     """
     out = {}
 
@@ -60,8 +60,8 @@ def twitter_scarper(input_file_path, output_file_path, format=json, size_flag=Fa
     """
 
     # tweepy OAuthHandler object
-    auth = tweepy.OAuthHandler(api_keys.api_key, api_keys.api_secret_key)
-    auth.set_access_token(api_keys.access_token, api_keys.access_token_secret)
+    auth = tweepy.OAuthHandler(api_key, api_secret_key)
+    auth.set_access_token(access_token, access_token_secret)
 
     try:
         auth.get_authorization_url()
@@ -75,8 +75,6 @@ def twitter_scarper(input_file_path, output_file_path, format=json, size_flag=Fa
 
     # wait_on_rate_limit will put the running code on sleep and will resume it after rate limit time
     api = tweepy.API(auth_handler=auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
-    input_file_path = input_file_path
-    output_file_path = output_file_path
     input_file = open(input_file_path, 'r')
     number_of_users = len(input_file.readlines())
 
@@ -97,11 +95,11 @@ def twitter_scarper(input_file_path, output_file_path, format=json, size_flag=Fa
     zip_file_name = time_str + '_profiles_' + str(number_of_users) + '.zip'
 
     count = 1
-    # user_if_all contains all the user IDs
+    # user_id_all contains all the user IDs
     user_id_all = []
-    # user_if_failed contains a list of user IDs that fail to extracted
+    # user_id_failed contains a list of user IDs that fail to extracted
     user_id_failed = []
-    # user_if_success contains a list of user IDs that api extracted
+    # user_id_success contains a list of user IDs that api extracted
     user_id_success = []
     data_list = []
 
@@ -152,7 +150,7 @@ def twitter_scarper(input_file_path, output_file_path, format=json, size_flag=Fa
 
                 data_list.extend(status_list)
 
-            # Extending the list fo failed IDs after each call to api
+            # Extending the list of failed IDs after each call to api
             user_id_failed.extend(list(set(user_id_all) - set(user_id_success)))
             if clean_userid_flag:
                 for user_id in user_id_success:
@@ -187,9 +185,6 @@ def twitter_scarper(input_file_path, output_file_path, format=json, size_flag=Fa
     logger.info('Number of successful ID:' + str(number_of_users - len(user_id_failed)) + ' and '
                 + 'Number of failed ID:' + str(len(user_id_failed)))
 
-    print('Number of successful ID:' + str(number_of_users - len(user_id_failed)) + ' and '
-          + 'Number of failed ID:' + str(len(user_id_failed)))
-
 
 def _generate_longitudinal_data(output_file_path, number_of_users, data_list):
     """
@@ -223,8 +218,8 @@ def get_twitter_user_id_from_screen_name(input_file_path, output_file_path):
     :param output_file_path: path to the output file where the corresponding the user_ids are saved
     """
 
-    auth = tweepy.OAuthHandler(api_keys.api_key, api_keys.api_secret_key)
-    auth.set_access_token(api_keys.access_token, api_keys.access_token_secret)
+    auth = tweepy.OAuthHandler(api_key, api_secret_key)
+    auth.set_access_token(access_token, access_token_secret)
 
     try:
         auth.get_authorization_url()

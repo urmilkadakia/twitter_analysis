@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 
-python -c 'import nltk; nltk.download("punkt"); nltk.download("stopwords")'
+python3 -c 'import nltk; nltk.download("punkt"); nltk.download("stopwords")'
 
-mkdir -p Logs
+mkdir -p logs

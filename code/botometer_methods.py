@@ -1,17 +1,19 @@
+import os
 import botometer
 import csv
-from datetime import datetime as dt
 import logging
 import requests
 import tweepy
-import api_keys
+from datetime import datetime as dt
+
+from api_keys import access_token, access_token_secret, api_key, api_secret_key, mashape_key
 from logger import log_twitter_error
 
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-filename = 'Logs/botometer_methods_' + dt.now().strftime("%m_%Y") + '.log'
+filename = os.path.join(os.getcwd(), 'logs/botometer_methods_' + dt.now().strftime("%m_%Y") + '.log')
 file_handler = logging.FileHandler(filename)
 
 formatter = logging.Formatter('%(asctime)s:%(levelname)s:%(name)s:%(message)s')
@@ -31,8 +33,8 @@ def bot_or_not(input_file_path, output_file_path):
     output_file = csv.writer(open(output_file_path, "w+"))
 
     try:
-        auth = tweepy.OAuthHandler(api_keys.api_key, api_keys.api_secret_key)
-        auth.set_access_token(api_keys.access_token, api_keys.access_token_secret)
+        auth = tweepy.OAuthHandler(api_key, api_secret_key)
+        auth.set_access_token(access_token, access_token_secret)
         auth.get_authorization_url()
     except tweepy.TweepError as e:
         log_twitter_error(logger, e)
@@ -40,13 +42,13 @@ def bot_or_not(input_file_path, output_file_path):
         exit(1)
 
     twitter_app_auth = {
-        'consumer_key': api_keys.api_key,
-        'consumer_secret': api_keys.api_secret_key,
-        'access_token': api_keys.access_token,
-        'access_token_secret': api_keys.access_token_secret,
+        'consumer_key': api_key,
+        'consumer_secret': api_secret_key,
+        'access_token': access_token,
+        'access_token_secret': access_token_secret,
     }
     bom = botometer.Botometer(wait_on_ratelimit=True,
-                              mashape_key=api_keys.mashape_key,
+                              mashape_key=mashape_key,
                               **twitter_app_auth)
 
     count = 1
@@ -74,4 +76,3 @@ def bot_or_not(input_file_path, output_file_path):
         count += 1
     logger.info('Number of successful ID:' + str(length_of_file - failed_count) + ' and '
                 + 'Number of failed ID:' + str(failed_count))
-

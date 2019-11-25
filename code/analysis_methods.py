@@ -1,9 +1,5 @@
 import json
 import csv
-import nltk
-from nltk.util import ngrams
-from nltk.tokenize import TweetTokenizer
-from nltk.corpus import stopwords
 import collections
 import re
 import string
@@ -15,7 +11,12 @@ from datetime import datetime as dt
 import datetime
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from reconstruction_methods import get_user_description_dict, reconstruct_user_description_dictionary, get_user_profile_dict
+from nltk.util import ngrams
+from nltk.tokenize import TweetTokenizer
+from nltk.corpus import stopwords
+
+from reconstruction_methods import get_user_description_dict, reconstruct_user_description_dictionary, \
+    get_user_profile_dict
 
 mpl.use('Agg')
 STOP_WORDS = set(stopwords.words('english'))
