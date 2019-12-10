@@ -35,7 +35,7 @@ def reconstruct_user_description_dictionary(input_file_folder_path, number_of_us
     :param input_file_folder_path: Path to the folder in which input files are stored
     :param number_of_users: To identify the input file as they are named based on the number of users
     :param end_date: date up to which the function will reconstruct the description dictionary
-    :return: A dictionary, , where keys are user ids and values are corresponding descriptions.
+    :return: A dictionary, where keys are user ids and values are corresponding descriptions.
     """
     first_flag = 1
     user_descriptions = {}
